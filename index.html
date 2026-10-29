@@ -1,0 +1,1344 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Cortado Planner</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+/* Layout: a white working surface on a cool grey plane, square corners, condensed caps for labels (Wakuli's own visual grammar), blue as the single accent, yellow only where the planner acts. */
+:root{
+  --bg:#F2F4F8; --surface:#FFFFFF; --surface-2:#F7F8FB; --ink:#0B0F1A; --ink-2:#434B5A; --muted:#7D8696; --line:#E1E5EC; --line-2:#CDD3DD;
+  --accent:#0062FF; --accent-ink:#FFFFFF; --accent-soft:#E5EEFF; --highlight:#FFF800; --highlight-ink:#0B0F1A; --sky:#83DDF6;
+  --good:#118A46; --good-soft:#E3F5EA; --warn:#C27A00; --warn-soft:#FFF1D6; --crit:#D7263D; --crit-soft:#FCE4E8;
+  --s1:#0062FF; --s2:#E8702A; --s3:#0E9F6E; --s4:#D98E04; --s5:#C2187A; --grey-series:#B9C0CC;
+  --font-display:"Barlow Condensed","Arial Narrow","Helvetica Neue",Arial,sans-serif;
+  --font-body:"Barlow","Helvetica Neue",Arial,sans-serif;
+  --shadow:0 1px 0 rgba(11,15,26,.04);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E121B; --surface:#161B26; --surface-2:#1C2230; --ink:#EEF1F6; --ink-2:#C0C7D3; --muted:#8792A3; --line:#273040; --line-2:#36405A;
+  --accent:#4D8DFF; --accent-ink:#0B0F1A; --accent-soft:#1A2B4D; --highlight:#FFF800; --highlight-ink:#0B0F1A; --sky:#4FB7D8;
+  --good:#2FBF71; --good-soft:#14301F; --warn:#F2A71B; --warn-soft:#3A2B0E; --crit:#FF5A6E; --crit-soft:#3D161C;
+  --s1:#4D8DFF; --s2:#D9641F; --s3:#0F9A66; --s4:#C98500; --s5:#C0267A; --grey-series:#4A5468; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0E121B; --surface:#161B26; --surface-2:#1C2230; --ink:#EEF1F6; --ink-2:#C0C7D3; --muted:#8792A3; --line:#273040; --line-2:#36405A;
+  --accent:#4D8DFF; --accent-ink:#0B0F1A; --accent-soft:#1A2B4D; --highlight:#FFF800; --highlight-ink:#0B0F1A; --sky:#4FB7D8;
+  --good:#2FBF71; --good-soft:#14301F; --warn:#F2A71B; --warn-soft:#3A2B0E; --crit:#FF5A6E; --crit-soft:#3D161C;
+  --s1:#4D8DFF; --s2:#D9641F; --s3:#0F9A66; --s4:#C98500; --s5:#C0267A; --grey-series:#4A5468; color-scheme:dark;}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+h1,h2,h3,h4{margin:0;font-family:var(--font-display);font-weight:600;letter-spacing:.01em;text-wrap:balance}
+h2{font-size:22px;text-transform:uppercase;letter-spacing:.03em}
+h3{font-size:17px;text-transform:uppercase;letter-spacing:.04em}
+p{margin:0}
+a{color:var(--accent)}
+button,input,select{font:inherit;color:inherit}
+.wrap{max-width:1320px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+/* header */
+.top{background:var(--surface);border-bottom:2px solid var(--accent);position:sticky;top:env(safe-area-inset-top,0px);z-index:9}
+.top .wrap{display:flex;flex-wrap:wrap;align-items:center;gap:8px 24px;padding-block:10px}
+.brand{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.logo{font-family:var(--font-display);font-weight:700;font-size:28px;letter-spacing:.06em;color:var(--accent);text-transform:uppercase;line-height:1}
+.logo i{display:inline-block;width:10px;height:10px;background:var(--highlight);margin-left:4px;vertical-align:baseline}
+.sub{color:var(--ink-2);font-size:13px}
+.ctx{margin-left:auto;color:var(--ink-2);font-size:13px;display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.ctx b{color:var(--ink);font-weight:600}
+.ctx .doc{font-family:var(--font-display);text-transform:uppercase;letter-spacing:.06em;font-size:14px;font-weight:600;border:1.5px solid var(--accent);padding:4px 10px;text-decoration:none}
+.tabs{background:var(--surface);border-bottom:1px solid var(--line)}
+.tabs .wrap{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+.tabs button{background:none;border:0;border-bottom:3px solid transparent;padding:10px 14px 8px;font-family:var(--font-display);font-size:16px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-2);cursor:pointer;white-space:nowrap}
+.tabs button:hover{color:var(--ink)}
+.tabs button[aria-current="page"]{color:var(--accent);border-bottom-color:var(--highlight)}
+.tabs button:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+main.wrap{padding-block:18px 40px;display:grid;gap:16px}
+footer.wrap{padding-block:0 32px;color:var(--muted);font-size:12px}
+/* cards & grid */
+.card{background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);padding:14px 16px;min-width:0}
+.card.flat{box-shadow:none}
+.card-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.card-h .hint{color:var(--muted);font-size:12.5px}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}
+.g2e{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g2b{grid-template-columns:minmax(0,1fr) minmax(0,1.05fr)}
+.g2d{grid-template-columns:repeat(2,minmax(0,1fr))}
+.kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+.kpi{background:var(--surface);border:1px solid var(--line);padding:12px 14px;min-width:0;display:flex;flex-direction:column;gap:4px}
+.kpi .l{font-family:var(--font-display);text-transform:uppercase;letter-spacing:.06em;font-size:12.5px;color:var(--ink-2);font-weight:600}
+.kpi .v{font-size:30px;font-weight:600;line-height:1.05;font-family:var(--font-display)}
+.kpi .d{font-size:12.5px;color:var(--muted)}
+.kpi .d.good{color:var(--good)} .kpi .d.bad{color:var(--crit)}
+.kpi .tgt{display:inline-block;margin-top:2px;font-size:11.5px;color:var(--muted)}
+.eyebrow{font-family:var(--font-display);text-transform:uppercase;letter-spacing:.08em;font-size:12.5px;color:var(--muted);font-weight:600}
+/* controls */
+.filters{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+.filters label{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink-2)}
+select,input[type=text],input[type=number],input[type=date],textarea{background:var(--surface);border:1.5px solid var(--line-2);border-radius:0;padding:6px 8px;font-size:13.5px;color:var(--ink);min-width:0}
+select{padding-right:6px}
+textarea{width:100%;font-family:inherit;resize:vertical}
+.btn{background:var(--surface);border:1.5px solid var(--accent);color:var(--accent);padding:6px 12px;cursor:pointer;font-family:var(--font-display);text-transform:uppercase;letter-spacing:.06em;font-size:14px;font-weight:600;border-radius:0}
+.btn:hover{background:var(--accent-soft)}
+.btn.primary{background:var(--highlight);color:var(--highlight-ink);border-color:var(--highlight-ink)}
+.btn.primary:hover{filter:brightness(.96)}
+.btn.sm{font-size:12.5px;padding:3px 8px}
+.btn.ghost{border-color:var(--line-2);color:var(--ink-2)}
+.seg{display:inline-flex;border:1.5px solid var(--line-2)}
+.seg button{background:none;border:0;padding:5px 10px;cursor:pointer;font-size:13px;color:var(--ink-2)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.toggle{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--ink-2);cursor:pointer}
+/* tables */
+.scroll{overflow-x:auto;min-width:0}
+table.data{border-collapse:collapse;width:100%;font-size:13px}
+table.data th{font-family:var(--font-display);text-transform:uppercase;letter-spacing:.05em;font-size:12px;color:var(--ink-2);text-align:left;padding:6px 8px;border-bottom:1.5px solid var(--line-2);white-space:nowrap;font-weight:600}
+table.data td{padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.data tr:last-child td{border-bottom:0}
+table.data .num,table.data td.num,table.data th.num{text-align:right;font-variant-numeric:tabular-nums}
+table.data tr.click{cursor:pointer} table.data tr.click:hover td{background:var(--surface-2)}
+table.data tr.sel td{background:var(--accent-soft)}
+table.data.compact td,table.data.compact th{padding:4px 6px;font-size:12.5px}
+table.data input.qty{width:68px;text-align:right;padding:3px 6px;font-variant-numeric:tabular-nums}
+table.data input.qty.changed{border-color:var(--accent);background:var(--accent-soft)}
+td.sku{min-width:230px} td.sku b{display:block;font-weight:600} td.sku span{color:var(--muted);font-size:12px}
+td.nw{white-space:nowrap} .pills{min-width:150px}
+tr.crit td:first-child{box-shadow:inset 3px 0 0 var(--crit)} tr.warn td:first-child{box-shadow:inset 3px 0 0 var(--warn)}
+.pill{display:inline-block;padding:1px 7px;font-size:11.5px;font-family:var(--font-display);text-transform:uppercase;letter-spacing:.05em;font-weight:600;border:1px solid transparent;white-space:nowrap}
+.pill.crit{background:var(--crit-soft);color:var(--crit)} .pill.warn{background:var(--warn-soft);color:var(--warn)} .pill.good{background:var(--good-soft);color:var(--good)} .pill.info{background:var(--accent-soft);color:var(--accent)} .pill.neutral{background:var(--surface-2);color:var(--ink-2);border-color:var(--line)}
+.pills{display:flex;gap:4px;flex-wrap:wrap}
+/* heatmap table */
+table.heat{border-collapse:separate;border-spacing:2px;font-size:12.5px}
+table.heat th{font-family:var(--font-display);text-transform:uppercase;letter-spacing:.04em;font-size:11.5px;color:var(--ink-2);text-align:left;padding:4px 6px;white-space:nowrap;font-weight:600}
+table.heat thead th{text-align:center;vertical-align:bottom}
+table.heat td{padding:5px 6px;text-align:right;font-variant-numeric:tabular-nums;background:color-mix(in oklab,var(--accent) calc(var(--p)*78%),var(--surface));color:var(--ink);min-width:54px}
+table.heat td.deep{color:#fff}
+table.heat td.na{background:var(--surface-2);color:var(--muted);text-align:center}
+table.heat td.click{cursor:pointer}
+/* charts */
+.chart{position:relative;min-width:0}
+.chart svg{display:block;max-width:100%;font-family:var(--font-body)}
+.chart .grid{stroke:var(--line);stroke-width:1} .chart .axis{stroke:var(--line-2);stroke-width:1}
+.chart .ax{fill:var(--muted);font-size:11px} .chart .lbl{fill:var(--ink-2);font-size:12px} .chart .val{fill:var(--ink-2);font-size:11px;font-variant-numeric:tabular-nums}
+.chart .mk{fill:var(--muted);font-size:10.5px}
+.chart .ln{fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round} .chart .ln.dashed{stroke-dasharray:4 4}
+.chart .band{fill-opacity:.12;stroke:none}
+.chart .dot{stroke:var(--surface);stroke-width:2} .chart .dot.dim{opacity:.45}
+.chart .bar{shape-rendering:crispEdges} .chart .bar:hover{filter:brightness(1.12)}
+.chart .future{fill:var(--ink);fill-opacity:.035}
+.chart .marker{stroke:var(--muted);stroke-width:1;stroke-dasharray:2 3} .chart .marker.promo{stroke:var(--s5)} .chart .marker.launch{stroke:var(--s3)}
+.chart .cross{stroke:var(--ink-2);stroke-width:1}
+.tip{position:absolute;background:var(--ink);color:var(--surface);padding:7px 9px;font-size:12px;pointer-events:none;z-index:5;min-width:120px;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+.tip .tip-h{font-weight:600;margin-bottom:3px;opacity:.85}
+.tip .tip-r{display:flex;align-items:center;gap:6px;white-space:nowrap} .tip .tip-r i{display:inline-block;width:12px;height:2px} .tip .tip-r b{font-weight:600;font-variant-numeric:tabular-nums} .tip .tip-r span{opacity:.8}
+.tip .tip-s{opacity:.7;font-size:11px}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:6px;font-size:12px;color:var(--ink-2)}
+.legend i{display:inline-block;width:14px;height:2px;vertical-align:middle;margin-right:6px} .legend i.sq{height:10px;width:10px} .legend i.dashed{background:repeating-linear-gradient(90deg,currentColor 0 3px,transparent 3px 6px)}
+.spark .spark-fill{fill-opacity:.12} .spark .spark-ln{fill:none;stroke-width:1.5}
+/* misc */
+.stack{display:grid;gap:10px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.muted{color:var(--muted)} .small{font-size:12.5px} .num{font-variant-numeric:tabular-nums}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13px} .kv dt{color:var(--muted)} .kv dd{margin:0;font-variant-numeric:tabular-nums}
+.note{background:var(--surface-2);border-left:3px solid var(--accent);padding:8px 10px;font-size:13px;color:var(--ink-2)}
+.timeline{display:grid;gap:10px}
+.tl{display:grid;grid-template-columns:92px 1fr;gap:12px;border:1px solid var(--line);background:var(--surface);padding:12px 14px}
+.tl .when{font-family:var(--font-display);font-size:16px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;line-height:1.1}
+.tl .when small{display:block;font-size:11.5px;color:var(--muted);letter-spacing:.06em;margin-top:2px}
+.tl .ttl{font-weight:600;font-size:14.5px}
+.tl details{margin-top:8px} .tl summary{cursor:pointer;color:var(--accent);font-size:13px}
+.ovr-list{display:grid;gap:6px;font-size:13px} .ovr-list div{border:1px solid var(--line);padding:6px 8px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.loading{padding:40px;text-align:center;color:var(--muted)}
+.badge-proto{font-family:var(--font-display);text-transform:uppercase;letter-spacing:.08em;font-size:11.5px;background:var(--highlight);color:var(--highlight-ink);padding:2px 6px;font-weight:700}
+.dowbar{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;align-items:end;height:56px}
+.dowbar div{background:var(--accent);position:relative} .dowbar div span{position:absolute;top:100%;left:0;right:0;text-align:center;font-size:10.5px;color:var(--muted);margin-top:2px}
+.dowbar{margin-bottom:18px}
+.mini-bars{display:grid;gap:4px;font-size:12.5px} .mini-bars div{display:grid;grid-template-columns:150px 1fr 56px;gap:8px;align-items:center} .mini-bars i{display:block;height:10px;background:var(--grey-series)} .mini-bars .best i{background:var(--accent)} .mini-bars span{text-align:right;font-variant-numeric:tabular-nums}
+@media (max-width:980px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}.g2,.g2e,.g3,.g2b{grid-template-columns:1fr}}
+@media (max-width:640px){.g2d{grid-template-columns:1fr}}
+@media (max-width:560px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.kpi .v{font-size:24px}.tl{grid-template-columns:1fr}.mini-bars div{grid-template-columns:110px 1fr 50px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <div class="brand"><span class="logo">Cortado<i></i></span><span class="sub">Retail demand planner for the Wakuli bar network <span class="badge-proto">prototype · synthetic data</span></span></div>
+  <div class="ctx"><span>Today <b id="ctx-today">…</b></span><span>Next deliveries <b id="ctx-deliv">…</b></span><a class="doc" href="how-it-works.html">How it works</a></div>
+</div></header>
+<nav class="tabs" aria-label="Sections"><div class="wrap"></div></nav>
+<main class="wrap" id="view"></main>
+<footer class="wrap">Built by Paolo Caneparo as a working prototype for the Retail Demand Planner role. Bar names come from Wakuli's public store locator; every volume, stock level and KPI is simulated and carries no real Wakuli data. Forecasts, proposals and KPIs are computed in the browser when the page loads.</footer>
+<script>
+/* ============================================================
+   Cortado - synthetic network data for the prototype
+   Deterministic (seeded). Nothing here is real Wakuli data:
+   bar names come from the public store locator, everything
+   else (volumes, SKUs, stock, waste) is simulated.
+   ============================================================ */
+const DAY = 86400000;
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+const rnd = mulberry32(20261029);
+function gauss(){let u=0,v=0;while(u===0)u=rnd();while(v===0)v=rnd();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function clamp(x,a,b){return x<a?a:x>b?b:x;}
+
+/* ---- calendar ---- */
+const TODAY = Date.UTC(2026,9,29);               // Thu 29 Oct 2026, order day
+const WEEKS_HIST = 78;                           // complete weeks of history
+const H = WEEKS_HIST*7 + 3;                      // + Mon-Wed of the current week
+const START = TODAY - H*DAY;                     // Mon 28 Apr 2025
+const HORIZON = 70;                              // forecast days
+function dateOf(d){return new Date(START + d*DAY);}
+function dow(d){return d % 7;}                   // 0 = Mon ... 6 = Sun (START is a Monday)
+function doy(d){const t=dateOf(d);const y=Date.UTC(t.getUTCFullYear(),0,1);return Math.floor((t.getTime()-y)/DAY);}
+function ymd(d){return dateOf(d).toISOString().slice(0,10);}
+function dayIndex(iso){return Math.round((Date.parse(iso+'T00:00:00Z')-START)/DAY);}
+const DOW_NAMES=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function fmtDate(d){const t=dateOf(d);return `${DOW_NAMES[dow(d)]} ${t.getUTCDate()} ${MONTHS[t.getUTCMonth()]}`;}
+function fmtShort(d){const t=dateOf(d);return `${t.getUTCDate()} ${MONTHS[t.getUTCMonth()]}`;}
+
+/* Menu seasons (four menu changes a year) */
+const MENU_SEASONS=[
+  {key:'spring',name:'Spring menu',from:[2,2],to:[4,31]},
+  {key:'summer',name:'Summer menu',from:[5,1],to:[8,27]},
+  {key:'autumn',name:'Autumn menu',from:[8,28],to:[10,29]},
+  {key:'winter',name:'Winter menu',from:[11,30],to:[2,1]},
+];
+function menuSeason(d){
+  const t=dateOf(d), m=t.getUTCMonth(), day=t.getUTCDate();
+  const v=m*100+day;
+  if(v>=302&&v<=431)return 'spring';
+  if(v>=501&&v<=827)return 'summer';
+  if(v>=828&&v<=1029)return 'autumn';
+  return 'winter';
+}
+function seasonStartDay(d){ // day index where the current menu season started
+  let x=d; while(x>0 && menuSeason(x-1)===menuSeason(d)) x--; return x;
+}
+function seasonEndDay(d){ let x=d; while(menuSeason(x+1)===menuSeason(d)) x++; return x; }
+
+/* ---- stores (bar names from the public locator; attributes simulated) ---- */
+const CLUSTERS={
+  centre:{name:'City centre',profile:[0.88,0.88,0.94,1.0,1.1,1.36,1.3]},
+  neighbourhood:{name:'Neighbourhood',profile:[0.84,0.84,0.9,0.95,1.05,1.42,1.36]},
+  office:{name:'Office & commuter',profile:[1.22,1.26,1.26,1.2,1.1,0.54,0.42]},
+  student:{name:'Student',profile:[1.1,1.15,1.15,1.1,1.0,0.8,0.7]},
+};
+const STORE_DEFS=[
+  ['Amstelveenseweg','neighbourhood',1.05,-1],
+  ['Dijkmeerlaan','neighbourhood',0.7,H-63],
+  ['Fahrenheitstraat','neighbourhood',0.9,-1],
+  ['Haarlemmerplein','centre',1.35,-1,{satMarket:true}],
+  ['Haarlemmerstraat','centre',1.2,-1],
+  ['Jan Pieter Heijestraat','neighbourhood',1.1,-1],
+  ['Kerkstraat','centre',1.3,-1],
+  ['Koningstraat','centre',0.95,-1],
+  ['Linnaeusstraat','neighbourhood',1.0,-1,{satMarket:true}],
+  ['Lusthofstraat','neighbourhood',0.85,-1],
+  ['Meent','centre',1.25,-1],
+  ['Nobelstraat','student',1.15,-1],
+  ['Piet Heinstraat','neighbourhood',0.9,-1],
+  ['Stoeldraaierstraat','student',1.0,-1],
+  ['Theresiastraat','office',0.95,-1],
+  ['Tweede Jacob van Campenstraat','neighbourhood',1.15,-1],
+  ['Twijnstraat','student',1.05,-1],
+  ['Van Woustraat','neighbourhood',1.2,-1],
+  ['Varkensmarkt','centre',0.9,-1],
+  ['Vijzelgracht','office',1.4,-1],
+  ['Visstraat','centre',0.8,H-140],
+  ['Vos in Tuinstraat','centre',1.0,-1],
+  ['Wagenaarstraat','neighbourhood',0.75,H-27],
+  ['Ziekerstraat','centre',1.1,H-210],
+  ['Stationsplein (planned)','office',1.2,H+18,{planned:true}],
+];
+const STORES=STORE_DEFS.map((s,i)=>({id:i,name:'Wakuli '+s[0],short:s[0],cluster:s[1],index:s[2],opened:s[3],flags:s[4]||{},
+  profile:CLUSTERS[s[1]].profile}));
+
+/* ---- SKUs ---- */
+/* [id, name, category, unit, pack, shelfDays, baseDaily@index1, price, cost, opts] */
+const SKU_DEFS=[
+  ['BN-HOUSE','Original House Blend 250g','Retail beans','bag',6,42,4.5,9.3,3.9,{season:[0.18,355],trend:0.10,cv:0.35}],
+  ['BN-POWER','Power House Blend 250g','Retail beans','bag',6,42,2.8,9.9,4.0,{season:[0.18,355],trend:0.05,cv:0.4}],
+  ['BN-SOESP','Single Origin Espresso 250g','Retail beans','bag',6,42,2.2,10.7,4.4,{season:[0.15,355],cv:0.45}],
+  ['BN-SOFIL','Single Origin Filter 250g','Retail beans','bag',6,42,2.0,10.7,4.4,{season:[0.15,355],trend:0.25,cv:0.45}],
+  ['BN-DECAF','Single Origin Decaf 250g','Retail beans','bag',6,42,0.9,10.7,4.6,{cv:0.6}],
+  ['BN-DISCO','Discover Monthly 250g','Retail beans','bag',6,42,1.8,10.9,4.6,{season:[0.15,355],cv:0.5,rotate:true}],
+  ['BN-MICRO','Seasonal Microlot 250g','Retail beans','bag',6,42,0.5,16.7,7.5,{cv:0.8,season:[0.2,355]}],
+  ['BN-DRIP','Microlot Drip Bag 5-pack','Retail beans','pack',10,120,0.6,7.5,3.1,{cv:0.7}],
+  ['BC-ESP','Espresso beans 1kg (bar)','Bar coffee','kg',5,42,3.6,0,14,{weather:-0.004,trend:0.08,cv:0.15}],
+  ['BC-FIL','Filter beans 1kg (bar)','Bar coffee','kg',5,42,1.4,0,14,{weather:-0.006,trend:0.15,cv:0.2}],
+  ['BC-DEC','Decaf beans 1kg (bar)','Bar coffee','kg',5,42,0.5,0,15,{cv:0.3}],
+  ['DA-MILK','Whole milk 1L','Dairy & alternatives','L',12,7,14,0,1.1,{weather:-0.004,cv:0.18}],
+  ['DA-OAT','Oat milk 1L','Dairy & alternatives','L',6,180,11,0,1.6,{trend:0.22,cv:0.18}],
+  ['DA-LFREE','Lactose-free milk 1L','Dairy & alternatives','L',6,7,1.5,0,1.4,{cv:0.4}],
+  ['SY-VAN','Vanilla syrup 1L','Syrups & specials','btl',6,365,0.55,0,6.5,{cv:0.4}],
+  ['SY-CAR','Caramel syrup 1L','Syrups & specials','btl',6,365,0.45,0,6.5,{cv:0.4}],
+  ['SY-PUMP','Pumpkin spice syrup 1L','Syrups & specials','btl',6,365,0.7,0,7.0,{cv:0.4,window:['autumn']}],
+  ['SY-MAPLE','Maple syrup 1L','Syrups & specials','btl',6,365,0.4,0,8.0,{cv:0.45,window:['autumn','winter']}],
+  ['SY-SPEC','Speculaas syrup 1L','Syrups & specials','btl',6,365,0.6,0,7.0,{cv:0.4,window:['winter'],launch:'2026-11-30',analog:'SY-PUMP',analogRatio:0.85}],
+  ['SP-CHAI','Chai concentrate 1L','Syrups & specials','btl',6,120,0.8,0,5.5,{weather:-0.01,cv:0.35}],
+  ['SP-MATCHA','Matcha 100g','Syrups & specials','tin',6,365,0.3,0,9.0,{trend:0.4,cv:0.5}],
+  ['CD-NITRO','Nitro Cold Brew can 200ml','Cold drinks','can',24,180,5,3.6,1.3,{weather:0.05,season:[0.5,200],cv:0.4,end:'2026-10-31'}],
+  ['CD-SPRITZ','Grapefruit Cold Brew Spritz can','Cold drinks','can',24,180,3,3.9,1.4,{weather:0.06,season:[0.6,200],cv:0.45}],
+  ['CD-KEG','Cold brew keg 5L','Cold drinks','keg',1,21,0.5,0,22,{weather:0.07,season:[0.7,200],cv:0.5}],
+  ['CD-WATER','Sparkling water 330ml','Cold drinks','btl',24,365,6,2.5,0.5,{weather:0.03,season:[0.3,200],cv:0.3}],
+  ['CD-OJ','Orange juice 250ml','Cold drinks','btl',12,10,4,3.5,1.2,{weather:0.02,cv:0.35}],
+  ['FF-CROIS','Butter croissant','Fresh food','pc',12,1,22,3.2,0.9,{weekend:1.3,cv:0.22}],
+  ['FF-PAC','Pain au chocolat','Fresh food','pc',12,1,16,3.5,1.0,{weekend:1.3,cv:0.22}],
+  ['FF-CINN','Cinnamon bun','Fresh food','pc',8,1,12,3.9,1.1,{weekend:1.4,cv:0.25}],
+  ['FF-BANANA','Banana bread slice','Fresh food','pc',10,3,10,3.5,0.9,{cv:0.24}],
+  ['FF-COOKIE','Chocolate chip cookie','Fresh food','pc',12,5,9,2.8,0.7,{cv:0.35}],
+  ['FF-GRAN','Granola yoghurt pot','Fresh food','pc',6,3,6,4.5,1.6,{weekend:0.7,cv:0.4}],
+  ['PK-CUP8','Takeaway cup 8oz','Packaging','pc',500,9999,60,0,0.09,{cv:0.1}],
+  ['PK-CUP12','Takeaway cup 12oz','Packaging','pc',500,9999,45,0,0.11,{weather:0.01,cv:0.1}],
+  ['PK-LID','Lid 80mm','Packaging','pc',1000,9999,105,0,0.03,{cv:0.1}],
+  ['PK-NAP','Napkins (pack of 250)','Packaging','pack',8,9999,0.9,0,2.1,{cv:0.3}],
+  ['PK-FILT','Filter papers (box of 100)','Packaging','box',6,9999,0.35,0,5.5,{cv:0.4}],
+  ['PK-BAG','Takeaway paper bag','Packaging','pc',250,9999,30,0,0.06,{cv:0.15}],
+  ['MR-TIN','Wakuli coffee tin','Merch','pc',6,9999,0.15,10,3.5,{season:[0.5,355],cv:1.2,intermittent:true}],
+  ['MR-CUP','Acme x Wakuli cup','Merch','pc',6,9999,0.2,11,4.0,{season:[0.4,355],cv:1.2,intermittent:true}],
+  ['MR-GIFT','Giftcard (physical)','Merch','pc',10,9999,0.25,10,0.5,{season:[0.9,355],cv:1.2,intermittent:true}],
+];
+const CATEGORIES=['Retail beans','Bar coffee','Dairy & alternatives','Syrups & specials','Cold drinks','Fresh food','Packaging','Merch'];
+const CAT_META={
+  'Retail beans':{type:'CPG',group:'ambient',service:0.97},
+  'Bar coffee':{type:'ingredient',group:'ambient',service:0.98},
+  'Dairy & alternatives':{type:'ingredient',group:'chilled',service:0.96},
+  'Syrups & specials':{type:'ingredient',group:'ambient',service:0.95},
+  'Cold drinks':{type:'CPG',group:'chilled',service:0.93},
+  'Fresh food':{type:'fresh',group:'daily',service:0.90},
+  'Packaging':{type:'non-CPG',group:'ambient',service:0.99},
+  'Merch':{type:'non-CPG',group:'ambient',service:0.90},
+};
+const SKUS=SKU_DEFS.map((s,i)=>{const o=s[9]||{};return {idx:i,id:s[0],name:s[1],cat:s[2],unit:s[3],pack:s[4],shelf:s[5],base:s[6],price:s[7],cost:s[8],
+  rev: s[7]>0 ? s[7] : s[8]*4,   // revenue proxy: ingredients drive drink revenue (4x cost)
+  season:o.season||null,trend:o.trend||0,cv:o.cv||0.3,weather:o.weather||0,weekend:o.weekend||1,window:o.window||null,
+  launch:o.launch?dayIndex(o.launch):null,end:o.end?dayIndex(o.end):null,analog:o.analog||null,analogRatio:o.analogRatio||1,
+  rotate:!!o.rotate,intermittent:!!o.intermittent,
+  group: s[5]<=1 ? 'daily' : CAT_META[s[2]].group,
+  type: CAT_META[s[2]].type, service: CAT_META[s[2]].service};});
+const SKU_BY_ID=Object.fromEntries(SKUS.map(s=>[s.id,s]));
+
+/* Delivery schedule from the Amsterdam hub (day-of-week lists, 0 = Mon). Orders close the day before delivery. */
+const DELIVERY={ambient:[0,3],chilled:[0,2,4],daily:[0,1,2,3,4,5,6]};
+function isDeliveryDay(group,d){return DELIVERY[group].includes(dow(d));}
+function nextDelivery(group,fromDay){let d=fromDay;while(!isDeliveryDay(group,d))d++;return d;}
+
+/* ---- weather: daily mean temperature, NL-like climatology with AR(1) noise ---- */
+const TEMP=new Float32Array(H+HORIZON);
+{let e=0;for(let d=0;d<H+HORIZON;d++){e=0.72*e+2.4*gauss();TEMP[d]=10.6+8.4*Math.cos(2*Math.PI*(doy(d)-200)/365)+e;}}
+function climTemp(d){return 10.6+8.4*Math.cos(2*Math.PI*(doy(d)-200)/365);}
+/* Weather forecast feed (mock): the next 10 days are "known", beyond that climatology */
+function tempForecast(d){return d<H+10?TEMP[d]:climTemp(d);}
+
+/* ---- events & promotions (known in advance, so the forecast can use them) ---- */
+/* scope: 'network' | 'cluster:<key>' | 'store:<id>' ; cats: array or null (all) ; mult */
+function yearly(name,m,d1,d2,scope,cats,mult,kind){const out=[];for(const y of [2025,2026]){out.push({name,from:Date.UTC(y,m,d1),to:Date.UTC(y,m,d2),scope,cats,mult,kind:kind||'event'});}return out;}
+const EVENT_DEFS=[
+  ...yearly("King's Day",3,27,27,'cluster:centre',['Bar coffee','Dairy & alternatives','Cold drinks','Fresh food','Packaging','Syrups & specials'],1.5),
+  ...yearly("King's Day",3,27,27,'cluster:office',null,0.3),
+  ...yearly("King's Day",3,27,27,'network',['Retail beans','Merch'],0.6),
+  ...yearly('Summer holidays',6,18,8,'cluster:office',null,0.8),
+  ...yearly('Summer holidays',6,18,8,'cluster:student',null,0.72),
+  ...yearly('Summer holidays',6,18,8,'cluster:centre',null,1.08),
+  {name:'Pride weekend',from:Date.UTC(2025,7,2),to:Date.UTC(2025,7,3),scope:'cluster:centre',cats:null,mult:1.3},
+  {name:'Pride weekend',from:Date.UTC(2026,7,1),to:Date.UTC(2026,7,2),scope:'cluster:centre',cats:null,mult:1.3},
+  {name:'Marathon Sunday',from:Date.UTC(2025,9,19),to:Date.UTC(2025,9,19),scope:'cluster:centre',cats:null,mult:1.25},
+  {name:'Marathon Sunday',from:Date.UTC(2026,9,18),to:Date.UTC(2026,9,18),scope:'cluster:centre',cats:null,mult:1.25},
+  {name:'Black Friday weekend',from:Date.UTC(2025,10,28),to:Date.UTC(2025,11,1),scope:'network',cats:['Retail beans'],mult:1.6,kind:'promo'},
+  {name:'Black Friday weekend',from:Date.UTC(2025,10,28),to:Date.UTC(2025,11,1),scope:'network',cats:['Merch'],mult:1.5,kind:'promo'},
+  {name:'Black Friday weekend',from:Date.UTC(2026,10,27),to:Date.UTC(2026,10,30),scope:'network',cats:['Retail beans'],mult:1.6,kind:'promo'},
+  {name:'Black Friday weekend',from:Date.UTC(2026,10,27),to:Date.UTC(2026,10,30),scope:'network',cats:['Merch'],mult:1.5,kind:'promo'},
+  ...yearly('Sinterklaas gifting',11,1,5,'network',['Retail beans','Merch'],1.25),
+  ...yearly('Christmas week',11,21,27,'network',['Bar coffee','Dairy & alternatives','Fresh food','Packaging','Syrups & specials','Cold drinks'],0.75),
+  ...yearly('Christmas week',11,21,24,'network',['Retail beans','Merch'],1.35),
+  ...yearly('Christmas days (reduced hours)',11,25,26,'network',null,0.3),
+  ...yearly('New Year',0,1,1,'network',null,0.4),
+  ...yearly('Exam weeks',0,12,23,'cluster:student',null,1.15),
+  ...yearly('Exam weeks',5,8,19,'cluster:student',null,1.15),
+  {name:'Introduction week',from:Date.UTC(2025,7,18),to:Date.UTC(2025,7,22),scope:'cluster:student',cats:null,mult:1.3},
+  {name:'Introduction week',from:Date.UTC(2026,7,17),to:Date.UTC(2026,7,21),scope:'cluster:student',cats:null,mult:1.3},
+  {name:'Rotterdam Marathon',from:Date.UTC(2026,3,12),to:Date.UTC(2026,3,12),scope:'store:10',cats:null,mult:1.3},
+  {name:'Oat milk at no extra charge',from:Date.UTC(2026,2,9),to:Date.UTC(2026,2,15),scope:'network',cats:['Dairy & alternatives'],mult:1.25,kind:'promo',skus:['DA-OAT'],skuMult:1.45},
+  {name:'2 bags for 17 promo',from:Date.UTC(2026,8,14),to:Date.UTC(2026,8,27),scope:'network',cats:['Retail beans'],mult:1.35,kind:'promo'},
+  {name:'Museum Night',from:Date.UTC(2026,10,7),to:Date.UTC(2026,10,7),scope:'cluster:centre',cats:null,mult:1.15},
+  {name:'Sinterklaas arrival',from:Date.UTC(2026,10,14),to:Date.UTC(2026,10,14),scope:'cluster:centre',cats:null,mult:1.1},
+  {name:'Filter Friday launch promo',from:Date.UTC(2026,10,13),to:Date.UTC(2026,10,15),scope:'network',cats:['Retail beans'],mult:1.0,kind:'promo',skus:['BN-SOFIL'],skuMult:1.5},
+];
+const EVENTS=EVENT_DEFS.map((e,i)=>({...e,id:i,fromDay:Math.round((e.from-START)/DAY),toDay:Math.round((e.to-START)/DAY)}));
+function eventApplies(e,store,sku){
+  if(e.scope!=='network'){const [k,v]=e.scope.split(':');if(k==='cluster'&&store.cluster!==v)return false;if(k==='store'&&String(store.id)!==v)return false;}
+  if(e.skus){return e.skus.includes(sku.id)?true:(e.cats?e.cats.includes(sku.cat)&&e.mult!==1:false);}
+  if(e.cats&&!e.cats.includes(sku.cat))return false;
+  return true;
+}
+function eventMult(e,sku){return (e.skus&&e.skus.includes(sku.id))?e.skuMult:e.mult;}
+/* multiplier of all known events on day d for (store, sku), plus list of names */
+function knownFactors(store,sku,d){
+  let m=1;const names=[];
+  for(const e of EVENTS){if(d>=e.fromDay&&d<=e.toDay&&eventApplies(e,store,sku)){m*=eventMult(e,sku);names.push(e.name);}}
+  if(store.flags.satMarket&&dow(d)===5){m*=1.15;names.push('Saturday market');}
+  return {m,names};
+}
+
+/* ---- lifecycle: is the SKU on the menu on day d, and any launch / phase-out ramp ---- */
+function lifecycleMult(sku,d){
+  if(sku.launch!=null&&d<sku.launch)return 0;
+  if(sku.end!=null&&d>sku.end)return 0;
+  let m=1;
+  if(sku.window){
+    const s=menuSeason(d);
+    if(!sku.window.includes(s))return 0;
+    const ss=seasonStartDay(d), se=seasonEndDay(d);
+    if(d-ss<7)m*=0.55+0.45*((d-ss)/7);           // ramp-up in the first week of the menu
+    if(se-d<7&&!sku.window.includes(menuSeason(se+1)))m*=0.8; // tail in the last week before phase-out
+  }
+  if(sku.launch!=null){const k=d-sku.launch;if(k<21)m*=0.6+0.4*(k/21);}
+  if(sku.rotate){const t=dateOf(d).getUTCDate();if(t<=7)m*=1.35;else if(t>=26)m*=0.75;}
+  return m;
+}
+function seasonMult(sku,d){return sku.season?1+sku.season[0]*Math.cos(2*Math.PI*(doy(d)-sku.season[1])/365):1;}
+function trendMult(sku,d){return Math.pow(1+sku.trend,(d-H)/365);}
+function weatherMult(sku,temp){return sku.weather?clamp(1+sku.weather*(temp-15),0.5,2.2):1;}
+function storeRamp(store,d){if(store.opened<0)return 1;const k=d-store.opened;if(k<0)return 0;return k<28?0.65+0.35*(k/28):1;}
+
+/* unexplained week-to-week variation (what makes forecasting hard): a store-level and a SKU-level weekly shock */
+const SHOCK_S=[],SHOCK_K=[];const NWK=Math.ceil((H+HORIZON)/7)+1;
+for(let s=0;s<STORE_DEFS.length;s++){const a=new Float32Array(NWK);let e=0;for(let w=0;w<NWK;w++){e=0.5*e+0.07*gauss();a[w]=Math.exp(e);}SHOCK_S.push(a);}
+for(let k=0;k<SKU_DEFS.length;k++){const a=new Float32Array(NWK);let e=0;for(let w=0;w<NWK;w++){e=0.4*e+0.06*gauss();a[w]=Math.exp(e);}SHOCK_K.push(a);}
+/* ordering habits differ per bar: some lead baristas over-order, some under-order */
+const STORE_BIAS=STORE_DEFS.map(()=>clamp(1+0.14*gauss(),0.8,1.3));
+
+/* expected demand (no noise) for a day: the generating process. The forecast engine never sees this. */
+function trueDemand(store,sku,d,temp){
+  const lc=lifecycleMult(sku,d); if(lc===0)return 0;
+  let mu=sku.base*store.index*store.profile[dow(d)]*lc*seasonMult(sku,d)*trendMult(sku,d)*weatherMult(sku,temp)*storeRamp(store,d);
+  if(sku.weekend!==1&&dow(d)>=5)mu*=sku.weekend;
+  mu*=knownFactors(store,sku,d).m;
+  return mu;
+}
+
+/* ---- simulate the current (manual) ordering process to get sales, stock, waste, OOS ---- */
+const NS=STORES.length, NK=SKUS.length;
+const SER=[]; // SER[s][k] = {sales, demand, stock, waste, oos, received, lots, onOrder}
+function sampleDemand(mu,sku){
+  if(mu<=0)return 0;
+  if(sku.intermittent){ // lumpy: Bernoulli x size
+    const p=Math.min(0.9,mu/1.2); return rnd()<p?Math.max(1,Math.round(1.2*(1+0.8*Math.abs(gauss())))):0;
+  }
+  const x=mu*Math.max(0,1+sku.cv*gauss());
+  return Math.round(x+ (rnd()<(x-Math.floor(x))?0.5:0)); // stochastic rounding-ish
+}
+function simulate(){
+  for(let s=0;s<NS;s++){
+    SER[s]=[];const store=STORES[s];
+    for(let k=0;k<NK;k++){
+      const sku=SKUS[k];
+      const sales=new Float32Array(H).fill(NaN), demand=new Float32Array(H).fill(NaN), stock=new Float32Array(H).fill(NaN),
+            waste=new Float32Array(H).fill(0), oos=new Uint8Array(H), received=new Float32Array(H).fill(0);
+      let lots=[]; let onOrder=[]; // lots: {qty, exp}, onOrder: {qty, arrive}
+      const onHand=()=>lots.reduce((a,l)=>a+l.qty,0);
+      const open=store.opened<0?0:store.opened;
+      for(let d=open;d<H;d++){
+        // receive (a lot expires at the close of its last selling day)
+        for(let i=onOrder.length-1;i>=0;i--){if(onOrder[i].arrive<=d){lots.push({qty:onOrder[i].qty,exp:d+sku.shelf-1});received[d]+=onOrder[i].qty;onOrder.splice(i,1);}}
+        // manual ordering (the as-is process), the day before a delivery day
+        if(isDeliveryDay(sku.group,d+1)&&(sku.launch==null||d+1>=sku.launch)&&(sku.end==null||d+1<=sku.end)&&(!sku.window||sku.window.includes(menuSeason(d+1)))){
+          let nxt=nextDelivery(sku.group,d+2); const R=nxt-(d+1); // days the delivery must cover
+          // the lead barista's estimate: last week's sales, anchored on a gut feel of what the bar normally sells
+          const gut=sku.base*store.index*0.9*storeRamp(store,d+1);
+          let est;
+          let sum=0,n=0,mx=0,anyOos=false,activeDays=0;
+          for(let j=1;j<=7;j++){const v=sales[d-j];if(v===v&&lifecycleMult(sku,d-j)>0){activeDays++;sum+=oos[d-j]?Math.max(v,mx)*1.15:v;n++;mx=Math.max(mx,v);if(oos[d-j])anyOos=true;}}
+          if(activeDays<4||d-open<7){est=gut;}
+          else{est=0.75*(sum/n)+0.25*gut;if(anyOos)est*=1.15;
+            if(sku.shelf<=1){const ld=sales[d+1-7];const gutNext=sku.base*store.index*store.profile[dow(d+1)]*(sku.weekend!==1&&dow(d+1)>=5?sku.weekend:1)*0.95*storeRamp(store,d+1);
+              est=ld===ld?0.6*ld*(oos[d+1-7]?1.3:1)+0.4*gutNext:gutNext;}}
+          const fresh=sku.shelf<=3;
+          let target=est*(fresh?R:R+1)*(fresh?1.15:1.2)*(fresh?Math.sqrt(STORE_BIAS[s]):STORE_BIAS[s])*clamp(1+(fresh?0.1:0.2)*gauss(),0.5,1.8);
+          if(rnd()<0.04)target=0;                                            // forgot to order
+          const validNext=lots.filter(l=>l.exp>=d+1).reduce((a,l)=>a+l.qty,0);   // stock that will still be sellable tomorrow
+          let q=Math.max(0,target-validNext-onOrder.reduce((a,o)=>a+o.qty,0));
+          q=Math.ceil(q/sku.pack)*sku.pack;
+          if(q>0)onOrder.push({qty:q,arrive:d+1});
+        }
+        // demand & sales
+        const w7=Math.floor(d/7);
+        const mu=trueDemand(store,sku,d,TEMP[d])*SHOCK_S[s][w7]*SHOCK_K[k][w7]; const dem=sampleDemand(mu,sku);
+        let rem=dem; lots.sort((a,b)=>a.exp-b.exp);
+        for(const l of lots){const t=Math.min(l.qty,rem);l.qty-=t;rem-=t;if(rem===0)break;}
+        lots=lots.filter(l=>l.qty>0);
+        const sold=dem-rem;
+        // expire at close
+        let w=0; lots=lots.filter(l=>{if(l.exp<=d){w+=l.qty;return false;}return true;});
+        sales[d]=sold;demand[d]=dem;stock[d]=onHand();waste[d]=w;oos[d]=rem>0?1:0;
+      }
+      SER[s][k]={sales,demand,stock,waste,oos,received,lots,onOrder};
+    }
+  }
+}
+simulate();
+
+/* ---- helpers ---- */
+function weekOf(d){return Math.floor(d/7);}
+function weekStart(w){return w*7;}
+function weeklySum(arr,w){let s=0,n=0;for(let d=w*7;d<Math.min(w*7+7,arr.length);d++){if(!isNaN(arr[d])){s+=arr[d];n++;}}return n?s:NaN;}
+function sumRange(arr,a,b){let s=0;for(let d=a;d<b;d++){const v=arr[d];if(v===v)s+=v;}return s;}
+function isoWeek(d){const t=dateOf(d);const x=new Date(Date.UTC(t.getUTCFullYear(),t.getUTCMonth(),t.getUTCDate()));const dayNum=x.getUTCDay()||7;x.setUTCDate(x.getUTCDate()+4-dayNum);const y0=new Date(Date.UTC(x.getUTCFullYear(),0,1));return Math.ceil((((x-y0)/DAY)+1)/7);}
+/* ============================================================
+   Cortado - forecasting engine
+   Per store x SKU: clean history (stock-out correction), strip the
+   known factors (events, promos, lifecycle), fit candidate models,
+   backtest them, pick the best, then re-apply the known factors
+   and the weather anomaly for the horizon.
+   ============================================================ */
+
+/* ---- normal distribution helpers ---- */
+function erf(x){const s=x<0?-1:1;x=Math.abs(x);const t=1/(1+0.3275911*x);const y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);return s*y;}
+function Phi(z){return 0.5*(1+erf(z/Math.SQRT2));}
+function phi(z){return Math.exp(-0.5*z*z)/Math.sqrt(2*Math.PI);}
+function normLoss(z){return phi(z)-z*(1-Phi(z));}          // E[max(0, X - z)] for standard normal
+function zOf(p){ // inverse normal CDF (Acklam)
+  p=Math.min(0.9999,Math.max(0.0001,p));
+  const a=[-3.969683028665376e+01,2.209460984245205e+02,-2.759285104469687e+02,1.383577518672690e+02,-3.066479806614716e+01,2.506628277459239e+00];
+  const b=[-5.447609879822406e+01,1.615858368580409e+02,-1.556989798598866e+02,6.680131188771972e+01,-1.328068155288572e+01];
+  const c=[-7.784894002430293e-03,-3.223964580411365e-01,-2.400758277161838e+00,-2.549732539343734e+00,4.374664141464968e+00,2.938163982698783e+00];
+  const d=[7.784695709041462e-03,3.224671290700398e-01,2.445134137142996e+00,3.754408661907416e+00];
+  const pl=0.02425,ph=1-pl;let q,r;
+  if(p<pl){q=Math.sqrt(-2*Math.log(p));return (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);}
+  if(p<=ph){q=p-0.5;r=q*q;return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1);}
+  q=Math.sqrt(-2*Math.log(1-p));return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);
+}
+function median(a){const b=a.slice().sort((x,y)=>x-y);const n=b.length;return n?(n%2?b[(n-1)/2]:(b[n/2-1]+b[n/2])/2):NaN;}
+function mean(a){let s=0,n=0;for(const v of a){if(v===v){s+=v;n++;}}return n?s/n:NaN;}
+
+const METHOD_NAMES={MA4:'Moving average (4 wk)',HW:'Exp. smoothing (Holt-Winters, weekly)',SEAS:'Holt-Winters x annual index',LY:'Last year x growth',CROSTON:'Croston (intermittent)',BLEND:'Blend of top 2',ANALOG:'Analog (cluster / sister SKU)'};
+const HW_GRID=[];for(const a of [0.1,0.25,0.4])for(const b of [0,0.02])for(const g of [0.05,0.2])HW_GRID.push([a,b,g]);
+const WEEK0=H-3;            // Monday of the current week (first incomplete week)
+const FOLDS=[WEEK0-56,WEEK0-28];
+
+/* known factors for every day (events, promos, lifecycle). The model fits the series with these divided out. */
+function knownSeries(store,sku){
+  const f=new Float32Array(H+HORIZON);
+  for(let d=0;d<H+HORIZON;d++){const lc=lifecycleMult(sku,d);f[d]=lc===0?0:lc*knownFactors(store,sku,d).m;}
+  return f;
+}
+/* stock-out corrected history: on days the bar was out of stock, lift the observation to the recent same-weekday level */
+function correctedHistory(ser,f,open){
+  const y=new Float32Array(H).fill(NaN);
+  for(let d=open;d<H;d++){
+    if(f[d]===0){continue;}
+    let v=ser.sales[d];
+    if(ser.oos[d]){ // sold out: the day's true demand was at least what sold; lift it to the upper range of recent same-weekday demand
+      const clean=[],all=[];for(let j=1;j<=4;j++){const p=d-7*j;if(p>=open&&y[p]===y[p]&&f[p]>0){const u=y[p]/f[p]*f[d];all.push(u);if(!ser.oos[p])clean.push(u);}}
+      if(clean.length>=2)v=Math.max(v,median(clean));
+      else if(all.length){all.sort((a,b)=>b-a);v=Math.max(v,all.length>=2?all[1]*1.05:all[0]);}
+    }
+    y[d]=v;
+  }
+  return y;
+}
+
+/* ---- candidate models on the baseline (factor-free) daily series ---- */
+function fitMA4(b,to){ // level from last 28 days, weekday shape from last 8 weeks
+  let s=0,n=0;for(let d=to-28;d<to;d++){if(d>=0&&b[d]===b[d])({s,n}={s:s+b[d],n:n+1});}
+  const level=n?s/n:0;
+  const dowS=[0,0,0,0,0,0,0],dowN=[0,0,0,0,0,0,0];
+  for(let d=to-56;d<to;d++){if(d>=0&&b[d]===b[d]){dowS[dow(d)]+=b[d];dowN[dow(d)]++;}}
+  const avg=mean(dowS.map((v,i)=>dowN[i]?v/dowN[i]:NaN))||1;
+  const prof=dowS.map((v,i)=>dowN[i]&&avg>0?(v/dowN[i])/avg:1);
+  return {level,prof,fc:(d)=>level*prof[dow(d)]};
+}
+function fitHW(b,to,alpha,beta,gamma,phi=0.95){
+  // initialise on the first 4 available weeks
+  let first=-1;for(let d=0;d<to;d++){if(b[d]===b[d]){first=d;break;}}
+  if(first<0)return null;
+  const init=[],ds=[0,0,0,0,0,0,0],dn=[0,0,0,0,0,0,0];
+  for(let d=first;d<Math.min(to,first+28);d++){if(b[d]===b[d]){init.push(b[d]);ds[dow(d)]+=b[d];dn[dow(d)]++;}}
+  if(init.length<7)return null;
+  let L=mean(init),T=0;const S=ds.map((v,i)=>dn[i]?v/dn[i]-L:0);
+  let sse=0,n=0;const start=Math.min(to,first+28);
+  for(let d=start;d<to;d++){
+    const v=b[d];if(v!==v)continue;
+    const i=dow(d);const fcst=L+phi*T+S[i];const e=v-fcst;
+    if(d>=to-56){sse+=e*e;n++;}
+    const Ln=alpha*(v-S[i])+(1-alpha)*(L+phi*T);
+    T=beta*(Ln-L)+(1-beta)*phi*T;
+    S[i]=gamma*(v-Ln)+(1-gamma)*S[i];
+    L=Ln;
+  }
+  const sd=n>3?Math.sqrt(sse/n):NaN;
+  return {L,T,S,sd,sse,n,params:[alpha,beta,gamma],fc:(d,k)=>{let tp=0,p=phi;for(let j=1;j<=k;j++){tp+=p;p*=phi;}return Math.max(0,L+tp*T+S[dow(d)]);}};
+}
+function bestHW(b,to){
+  let best=null;for(const [a,be,g] of HW_GRID){const m=fitHW(b,to,a,be,g);if(m&&(best===null||m.sse<best.sse))best=m;}
+  return best;
+}
+function fitCroston(b,to,alpha=0.1){
+  let z=NaN,p=NaN,q=0;
+  for(let d=Math.max(0,to-364);d<to;d++){const v=b[d];if(v!==v)continue;q++;if(v>0){if(z!==z){z=v;p=q;}else{z=alpha*v+(1-alpha)*z;p=alpha*q+(1-alpha)*p;}q=0;}}
+  const rate=(z===z&&p>0)?z/p:0;
+  return {rate,fc:()=>rate};
+}
+function fitLY(b,to){
+  let s=0,sl=0,n=0;for(let d=to-28;d<to;d++){if(d-364>=0&&b[d]===b[d]&&b[d-364]===b[d-364]){s+=b[d];sl+=b[d-364];n++;}}
+  if(n<14||sl<=0)return null;
+  const g=Math.min(2,Math.max(0.5,s/sl));
+  const prof=fitMA4(b,to).prof;
+  return {growth:g,fc:(d)=>{ // same week last year, as a weekly average spread over the current weekday shape
+    const p=d-364,w0=p-dow(p);let sum=0,m=0;for(let x=w0;x<w0+7;x++){if(x>=0&&x<b.length&&b[x]===b[x]){sum+=b[x];m++;}}
+    return m>=4?(sum/m)*prof[dow(d)]*g:NaN;}};
+}
+
+/* ---- annual index per category (network level, evergreen SKUs, weekly, smoothed) ---- */
+const CAT_WEEKLY={};
+function buildCategoryIndex(bases){
+  for(const cat of CATEGORIES){
+    const W=new Float32Array(WEEKS_HIST).fill(0);
+    for(let s=0;s<NS;s++){const st=STORES[s];if(st.opened>=0)continue;
+      for(let k=0;k<NK;k++){const sku=SKUS[k];if(sku.cat!==cat||sku.window||sku.launch!=null||sku.end!=null)continue;
+        const b=bases[s][k];for(let w=0;w<WEEKS_HIST;w++){for(let d=w*7;d<w*7+7;d++){if(b[d]===b[d])W[w]+=b[d];}}}}
+    const Sm=new Float32Array(WEEKS_HIST);for(let w=0;w<WEEKS_HIST;w++){let s=0,n=0;for(let j=-1;j<=1;j++){const x=w+j;if(x>=0&&x<WEEKS_HIST){s+=W[x];n++;}}Sm[w]=n?s/n:0;}
+    CAT_WEEKLY[cat]=Sm;
+  }
+}
+/* ratio of the same week last year to last year's equivalent of the origin week */
+function annualRatio(cat,originDay,d){
+  const Sm=CAT_WEEKLY[cat];if(!Sm)return 1;
+  const wo=weekOf(originDay)-52,wd=weekOf(d)-52;
+  if(wo<0||wd<0||wd>=WEEKS_HIST||!Sm[wo])return 1;
+  return Math.min(2.5,Math.max(0.4,Sm[wd]/Sm[wo]));
+}
+
+/* ---- evaluation ---- */
+function wapeWeekly(fcArr,yArr,from,len){ // weekly sums over len days starting at from (len multiple of 7)
+  let num=0,den=0;for(let w=0;w<len/7;w++){let f=0,y=0,ok=false;for(let d=from+w*7;d<from+w*7+7;d++){if(yArr[d]===yArr[d]){y+=yArr[d];f+=fcArr[d-from];ok=true;}}if(ok){num+=Math.abs(f-y);den+=y;}}
+  return den>0?num/den:NaN;
+}
+
+/* ---- main ---- */
+const FC={series:[],analog:{},catIndexReady:false};
+function methodForecast(name,models,b,sku,origin,d,k){
+  switch(name){
+    case 'MA4':return models.ma.fc(d);
+    case 'HW':return models.hw?models.hw.fc(d,k):models.ma.fc(d);
+    case 'SEAS':return (models.hw?models.hw.fc(d,k):models.ma.fc(d))*annualRatio(sku.cat,origin,d);
+    case 'LY':{const v=models.ly?models.ly.fc(d):NaN;return v===v?v:models.ma.fc(d);}
+    case 'CROSTON':return models.cr.fc();
+  }
+  return models.ma.fc(d);
+}
+function fitAll(b,to){return {ma:fitMA4(b,to),hw:bestHW(b,to),ly:fitLY(b,to),cr:fitCroston(b,to)};}
+
+function runForecasts(){
+  const bases=[],ys=[],fs=[];
+  for(let s=0;s<NS;s++){bases[s]=[];ys[s]=[];fs[s]=[];const store=STORES[s];
+    for(let k=0;k<NK;k++){const sku=SKUS[k];const f=knownSeries(store,sku);fs[s][k]=f;
+      if(store.opened>=H){bases[s][k]=new Float32Array(H).fill(NaN);ys[s][k]=bases[s][k];continue;}
+      const open=store.opened<0?0:store.opened;const y=correctedHistory(SER[s][k],f,open);ys[s][k]=y;
+      const b=new Float32Array(H);for(let d=0;d<H;d++)b[d]=(y[d]===y[d]&&f[d]>0)?y[d]/f[d]:NaN;bases[s][k]=b;}}
+  buildCategoryIndex(bases);
+  /* analog levels: per cluster and SKU, baseline daily units per index point, mature stores only */
+  for(const c of Object.keys(CLUSTERS)){FC.analog[c]=new Float32Array(NK);}
+  FC.analog.network=new Float32Array(NK);
+  for(let k=0;k<NK;k++){const per={};let allS=0,allN=0;
+    for(let s=0;s<NS;s++){const st=STORES[s];if(st.opened>=0&&H-st.opened<182)continue;let sum=0,n=0;for(let d=H-28;d<H;d++){const v=bases[s][k][d];if(v===v){sum+=v;n++;}}
+      if(n>=10){const lvl=sum/n/st.index;(per[st.cluster]=per[st.cluster]||[]).push(lvl);allS+=lvl;allN++;}}
+    FC.analog.network[k]=allN?allS/allN:0;
+    for(const c of Object.keys(CLUSTERS)){FC.analog[c][k]=per[c]&&per[c].length?mean(per[c]):FC.analog.network[k];}}
+  /* per series */
+  for(let s=0;s<NS;s++){FC.series[s]=[];const store=STORES[s];
+    for(let k=0;k<NK;k++){FC.series[s][k]=forecastSeries(s,k,bases[s][k],ys[s][k],fs[s][k]);}}
+  FC.bases=bases;FC.ys=ys;FC.fs=fs;
+}
+
+function analogDaily(store,sku,k,d){ // baseline daily units for a new bar (or sister SKU for a launch)
+  let lvl;
+  if(sku.launch!=null&&sku.analog){const a=SKU_BY_ID[sku.analog];lvl=FC.analog[store.cluster][a.idx]*sku.analogRatio;}
+  else lvl=FC.analog[store.cluster][k];
+  return lvl*store.index*store.profile[dow(d)]*(sku.weekend!==1&&dow(d)>=5?sku.weekend:1)*storeRamp(store,d);
+}
+
+function forecastSeries(s,k,b,y,f){
+  const store=STORES[s],sku=SKUS[k];
+  const nObs=(()=>{let n=0;for(let d=0;d<H;d++)if(b[d]===b[d])n++;return n;})();
+  const weeksHist=store.opened<0?WEEKS_HIST:(H-store.opened)/7;
+  const res={s,k,method:'ANALOG',wape:{},daily:new Float32Array(HORIZON),lo:new Float32Array(HORIZON),hi:new Float32Array(HORIZON),base:new Float32Array(HORIZON),
+             sdDaily:0,level:0,trendWk:0,prof:[1,1,1,1,1,1,1],weatherSlope:0,weeksHist,nObs,lag1:[],analogShare:0,params:null,isNew:store.opened>=H,isLaunch:sku.launch!=null&&sku.launch>=H};
+  const analogOnly=nObs<21||res.isNew||res.isLaunch;
+  let models=null,chosen='ANALOG',top2=['MA4','MA4'];
+  if(!analogOnly){
+    /* backtest */
+    const cand=['MA4','HW','SEAS','LY','CROSTON'];const score={};
+    const intermittent=sku.intermittent||(()=>{let z=0,n=0;for(let d=H-91;d<H;d++){if(b[d]===b[d]){n++;if(b[d]===0)z++;}}return n>30&&z/n>0.55;})();
+    for(const o of FOLDS){if(o<=0)continue;let nb=0;for(let d=0;d<o;d++)if(b[d]===b[d])nb++;if(nb<28)continue;
+      const m=fitAll(b,o);
+      for(const c of cand){if(c==='CROSTON'&&!intermittent)continue;if(c==='LY'&&!m.ly)continue;
+        const fcArr=new Float32Array(28);for(let j=0;j<28;j++){const d=o+j;fcArr[j]=Math.max(0,methodForecast(c,m,b,sku,o,d,j+1))*f[d];}
+        const w=wapeWeekly(fcArr,y,o,28);if(w===w){(score[c]=score[c]||[]).push(w);}}}
+    const avg={};for(const c of Object.keys(score))avg[c]=mean(score[c]);
+    res.wape=avg;
+    const ranked=Object.keys(avg).filter(c=>avg[c]===avg[c]).sort((a,c)=>avg[a]-avg[c]);
+    if(ranked.length){chosen=ranked[0];top2=[ranked[0],ranked[1]||ranked[0]];
+      if(ranked.length>1){ // evaluate the blend of the top two as well
+        let bl=[];for(const o of FOLDS){if(o<=0)continue;const m=fitAll(b,o);const fcArr=new Float32Array(28);let ok=true;
+          for(let j=0;j<28;j++){const d=o+j;fcArr[j]=0.5*(Math.max(0,methodForecast(top2[0],m,b,sku,o,d,j+1))+Math.max(0,methodForecast(top2[1],m,b,sku,o,d,j+1)))*f[d];}
+          const w=wapeWeekly(fcArr,y,o,28);if(w===w)bl.push(w);}
+        if(bl.length){avg.BLEND=mean(bl);if(avg.BLEND<avg[chosen]-0.005)chosen='BLEND';}}
+    }else chosen='MA4';
+    models=fitAll(b,H);
+    res.params=models.hw?models.hw.params:null;
+    res.level=models.ma.level;res.prof=models.ma.prof;
+    res.trendWk=models.hw&&models.ma.level>0?models.hw.T*7/models.ma.level:0;
+    /* weather sensitivity: regress relative residual on the temperature anomaly (last 26 weeks) */
+    {let sxy=0,sxx=0,n=0;for(let d=H-182;d<H;d++){if(d<28||b[d]!==b[d])continue;let s28=0,n28=0;for(let j=1;j<=28;j++){if(b[d-j]===b[d-j]){s28+=b[d-j];n28++;}}
+        if(n28<14||s28<=0)continue;const r=b[d]/(s28/n28)-1;const a=TEMP[d]-climTemp(d);sxy+=a*r;sxx+=a*a;n++;}
+      let slope=n>=60&&sxx>0?sxy/sxx:0;if(Math.abs(slope)*Math.sqrt(sxx/Math.max(1,n))<0.012)slope=0;res.weatherSlope=Math.min(0.1,Math.max(-0.05,slope));}
+    /* one-week-ahead rolling accuracy, last 12 weeks, chosen method with final-fit structure */
+    for(let w=12;w>=1;w--){const o=WEEK0-7*w;if(o<28)continue;let nb=0;for(let d=0;d<o;d++)if(b[d]===b[d])nb++;if(nb<14)continue;const m=fitAll(b,o);
+      const ownW=store.opened<0?1:Math.min(1,Math.max(0,((o-store.opened)/7-3)/8));
+      let fcw=0,yw=0,ok=false;for(let j=0;j<7;j++){const d=o+j;if(y[d]===y[d]){ok=true;yw+=y[d];let base=Math.max(0,blendForecast(chosen,top2,m,b,sku,o,d,j+1));if(ownW<1)base=ownW*base+(1-ownW)*analogDaily(store,sku,k,d);fcw+=base*f[d];}}
+      if(ok)res.lag1.push({week:weekOf(o),fc:fcw,act:yw});}
+    res.sdDaily=models.hw&&models.hw.sd===models.hw.sd?models.hw.sd:Math.max(0.3,0.5*models.ma.level);
+    res.method=chosen;
+    const own=Math.min(1,Math.max(0,(weeksHist-3)/8));res.analogShare=1-own;
+    for(let j=0;j<HORIZON;j++){const d=H+j;
+      let base=Math.max(0,blendForecast(chosen,top2,models,b,sku,H,d,j+1));
+      if(own<1)base=own*base+(1-own)*analogDaily(store,sku,k,d);
+      const wx=1+res.weatherSlope*(tempForecast(d)-climTemp(d));
+      res.base[j]=base;res.daily[j]=base*f[d]*Math.max(0.5,wx);}
+  }else{
+    res.method='ANALOG';res.analogShare=1;
+    for(let j=0;j<HORIZON;j++){const d=H+j;const base=analogDaily(store,sku,k,d);res.base[j]=base;res.daily[j]=base*f[d];}
+    const a=FC.analog[store.cluster][k];res.level=a*store.index;res.prof=store.profile.slice();res.sdDaily=Math.max(0.5,0.6*res.level);
+  }
+  for(let j=0;j<HORIZON;j++){const v=res.daily[j];const sd=res.sdDaily*(res.daily[j]>0?Math.max(0.6,Math.sqrt(v/Math.max(res.level,0.1))):0);res.lo[j]=Math.max(0,v-1.28*sd);res.hi[j]=v+1.28*sd;}
+  return res;
+}
+function blendForecast(chosen,top2,m,b,sku,o,d,k){
+  if(chosen==='BLEND')return 0.5*(methodForecast(top2[0],m,b,sku,o,d,k)+methodForecast(top2[1],m,b,sku,o,d,k));
+  return methodForecast(chosen,m,b,sku,o,d,k);
+}
+
+/* ---- overrides (planner adjustments), kept in this browser only ---- */
+const OVR={key:'cortado.overrides.v1',data:{}};
+try{OVR.data=JSON.parse(localStorage.getItem(OVR.key)||'{}')||{};}catch(e){OVR.data={};}
+function saveOverrides(){try{localStorage.setItem(OVR.key,JSON.stringify(OVR.data));}catch(e){}}
+function getOverride(s,k){return OVR.data[s+'|'+k]||null;}
+function setOverride(s,k,o){if(o)OVR.data[s+'|'+k]=o;else delete OVR.data[s+'|'+k];saveOverrides();}
+/* final daily forecast for day index d (>= H) with override applied */
+function fcDay(s,k,d){const r=FC.series[s][k];const j=d-H;if(j<0||j>=HORIZON)return 0;let v=r.daily[j];const o=getOverride(s,k);if(o){if(o.untilDay==null||d<=o.untilDay)v*=o.mult;}return v;}
+function fcSum(s,k,a,b){let t=0;for(let d=a;d<b;d++)t+=fcDay(s,k,d);return t;}
+function fcWeek(s,k,w){return fcSum(s,k,Math.max(H,w*7),w*7+7);}
+/* expected sales for a complete or partial week: actuals to date plus forecast for the rest */
+function weekActualPlusFc(s,k,w){let t=0;const y=FC.ys[s][k];for(let d=w*7;d<w*7+7;d++){if(d<H){if(y[d]===y[d])t+=y[d];}else t+=fcDay(s,k,d);}return t;}
+/* ============================================================
+   Cortado - replenishment proposals, KPIs, exceptions, launches
+   ============================================================ */
+const SERVICE_Z=(p)=>zOf(p);
+const LEAD=1; // hub lead time (order today, delivered on the next delivery day from tomorrow)
+
+/* stock position now = close of yesterday (day H-1) */
+function onHandNow(s,k){const v=SER[s][k].stock[H-1];return v===v?v:0;}
+function onOrderNow(s,k){return SER[s][k].onOrder.reduce((a,o)=>a+o.qty,0);}
+
+/* newsvendor critical ratio for short shelf life: margin / (margin + cost of an unsold unit) */
+function criticalRatio(sku){const price=sku.rev,cost=sku.cost;const under=Math.max(0.2,price-cost),over=cost;return under/(under+over);}
+
+function proposal(s,k,opts={}){
+  const store=STORES[s],sku=SKUS[k];const r=FC.series[s][k];
+  const T=H;const D1=nextDelivery(sku.group,T+1);const D2=nextDelivery(sku.group,D1+1);
+  const onHand=onHandNow(s,k),onOrder=onOrderNow(s,k);
+  const active=(sku.launch==null||D1>=sku.launch)&&(sku.end==null||D1<=sku.end)&&(!sku.window||sku.window.includes(menuSeason(D1)));
+  const bridge=fcSum(s,k,T,D1);                     // demand before the delivery lands
+  const cycle=fcSum(s,k,D1,D2);                      // demand the delivery must cover
+  // position when the delivery arrives: units still within shelf life at D1, after demand until then eats the expiring units first (FEFO)
+  let usable=0,expiring=0;
+  for(const l of SER[s][k].lots){if(l.exp>=D1)usable+=l.qty;else expiring+=l.qty;}
+  for(const o of SER[s][k].onOrder){if(o.arrive<D1){if(o.arrive+sku.shelf-1>=D1)usable+=o.qty;else expiring+=o.qty;}}
+  const stockAtD1=Math.max(0,usable-Math.max(0,bridge-expiring));
+  const fresh=sku.shelf<=3;
+  const service=fresh?criticalRatio(sku):sku.service;
+  const z=SERVICE_Z(service);
+  const protect=D2-T;
+  const sdCycle=r.sdDaily*Math.sqrt(Math.max(1,D2-D1));
+  const ss=fresh?z*sdCycle:z*r.sdDaily*Math.sqrt(protect);
+  const need=cycle+ss;
+  const flags=[];
+  if(!active){
+    if(sku.end!=null&&D1>sku.end)flags.push('phased out');else if(sku.launch!=null&&D1<sku.launch)flags.push('not launched yet');else flags.push('off menu');
+    const left=Math.max(0,onHand+onOrder-fcSum(s,k,T,T+HORIZON));
+    if(left>0&&sku.shelf<9999)flags.push('run-down stock');
+    return {s,k,sku,store,D1,D2,onHand,onOrder,bridge:0,cycle:0,stockAtD1:onHand+onOrder,ss:0,service,z,q:0,raw:0,flags,capped:false,runOut:null,oosProb:0,expLost:0,expWaste:left,minLevel:0,value:0,status:left>0?'warning':'ok',active,sellable:0};
+  }
+  let raw=Math.max(0,need-Math.max(0,stockAtD1));
+  // perishables round to the nearest pack (a pack too many is waste); ambient rounds up
+  let q;
+  if(sku.shelf<=10&&raw>0){ // short shelf life: pack-aware newsvendor, the pack multiple with the lowest expected cost of lost sales plus waste
+    const lo=Math.floor(raw/sku.pack)*sku.pack,hi=lo+sku.pack;const under=Math.max(0.2,sku.rev-sku.cost),over=sku.cost;
+    const cost=(Q)=>{const zq=sdCycle>0?(Math.max(0,stockAtD1)+Q-cycle)/sdCycle:(Q>=cycle?4:-4);return under*sdCycle*normLoss(zq)+over*sdCycle*normLoss(-zq);};
+    q=cost(hi)<cost(lo)?hi:lo;
+  }else q=Math.ceil(raw/sku.pack)*sku.pack;
+  // shelf-life cap: never deliver more than sells before it expires (demand within the shelf life, plus the same safety margin)
+  const sellable=fcSum(s,k,D1,Math.min(D1+sku.shelf,D1+HORIZON))-Math.max(0,stockAtD1)+ss;
+  let capped=false;
+  if(sku.shelf<9999&&q>0&&opts.respectShelf!==false&&q>sellable+0.5*sku.pack){
+    q=Math.max(0,Math.floor((sellable+0.5*sku.pack)/sku.pack)*sku.pack);capped=true;flags.push('shelf-life cap');
+  }
+  // projected stock-out before the delivery lands
+  let runOut=null,shortBefore=0;let pos=onHand;for(let d=T;d<D1;d++){for(const o of SER[s][k].onOrder){if(o.arrive===d)pos+=o.qty;}pos-=fcDay(s,k,d);if(pos<-0.5&&runOut==null)runOut=d;}
+  shortBefore=Math.max(0,-pos);
+  if(runOut!=null&&sku.group!=='daily')flags.push('stock-out before delivery');  // daily bakery items are expected to sell out some days
+  const expiringUnsold=Math.max(0,expiring-bridge);
+  if(expiringUnsold>=Math.max(1,0.25*sku.pack)&&sku.shelf<9999)flags.push('expiring stock');
+  // position after the delivery vs the cycle: risk measures
+  const posAfter=Math.max(0,stockAtD1)+q;
+  const zz=sdCycle>0?(posAfter-cycle)/sdCycle:(posAfter>=cycle?4:-4);
+  const oosProb=1-Phi(zz);
+  const expLost=sdCycle*normLoss(zz);
+  // expected waste: perishable units still on hand when they expire
+  let expWaste=0;
+  if(sku.shelf<9999){
+    if(sku.shelf<=D2-D1)expWaste=sdCycle*normLoss(-zz);                             // sells within one cycle or not at all
+    else expWaste=Math.max(0,posAfter-fcSum(s,k,D1,Math.min(D1+sku.shelf,D1+HORIZON)));  // what will not sell within the shelf life
+  }
+  const target=need; // the service-level (or newsvendor) target position
+  if(sku.shelf<9999&&posAfter>target+0.5*sku.pack&&expWaste>0.1*Math.max(1,cycle))flags.push('waste risk');
+  if(q===0&&stockAtD1>cycle*3&&sku.shelf<9999&&sku.shelf<60)flags.push('overstock');
+  const minLevel=cycle+ss;   // level the bar should hold at each delivery (the "minimum level" per bar)
+  const value=q*sku.cost;
+  const status=flags.includes('stock-out before delivery')?'critical':(flags.includes('waste risk')||flags.includes('overstock')||capped)?'warning':'ok';
+  return {s,k,sku,store,D1,D2,onHand,onOrder,bridge,cycle,stockAtD1,ss,service,z,q,raw,flags,capped,runOut,shortBefore,expiringUnsold,oosProb,expLost,expWaste,minLevel,value,status,active,sellable};
+}
+function storeProposals(s,opts){const out=[];for(let k=0;k<NK;k++)out.push(proposal(s,k,opts));return out;}
+
+/* ---- KPIs over the last 4 complete weeks ---- */
+function kpis(filter={},a=WEEK0-28,b=WEEK0){
+  let wasteU=0,wasteV=0,soldPerish=0,oosDays=0,days=0,lost=0,lostV=0,rev=0,freshDays=0,freshOut=0,freshWasteU=0,freshSold=0;
+  let lag1Num=0,lag1Den=0,lag1Bias=0;
+  for(let s=0;s<NS;s++){const st=STORES[s];if(st.opened>=H)continue;if(filter.store!=null&&filter.store!==s)continue;
+    for(let k=0;k<NK;k++){const sku=SKUS[k];if(filter.cat&&sku.cat!==filter.cat)continue;const ser=SER[s][k];const r=FC.series[s][k];const fresh=sku.group==='daily';
+      for(let d=a;d<b;d++){const v=ser.sales[d];if(v!==v)continue;rev+=v*sku.rev;
+        if(sku.shelf<9999){wasteU+=ser.waste[d];wasteV+=ser.waste[d]*sku.cost;soldPerish+=v;}
+        if(fresh){freshDays++;freshWasteU+=ser.waste[d];freshSold+=v;if(ser.oos[d])freshOut++;}else{days++;if(ser.oos[d])oosDays++;}
+        if(ser.oos[d]){const l=Math.max(0,ser.demand[d]-v);lost+=l;lostV+=l*sku.rev;}}
+      for(const p of r.lag1){if(p.week*7>=a&&p.week*7<b){lag1Num+=Math.abs(p.fc-p.act);lag1Den+=p.act;lag1Bias+=p.fc-p.act;}}}}
+  return {wape:lag1Den?lag1Num/lag1Den:NaN,bias:lag1Den?lag1Bias/lag1Den:NaN,wastePct:soldPerish+wasteU?wasteU/(soldPerish+wasteU):NaN,wasteV,
+    oosPct:days?oosDays/days:NaN,lostV,lost,rev,availability:days?1-oosDays/days:NaN,
+    freshSellout:freshDays?freshOut/freshDays:NaN,freshWaste:freshSold+freshWasteU?freshWasteU/(freshSold+freshWasteU):NaN};
+}
+function kpiTrend(weeks=12){ // weekly network series for the trend charts
+  const out=[];for(let w=weekOf(WEEK0)-weeks;w<weekOf(WEEK0);w++){const a=w*7,b=a+7;let num=0,den=0,bias=0,wasteU=0,sold=0,oos=0,days=0;
+    for(let s=0;s<NS;s++){if(STORES[s].opened>=H)continue;for(let k=0;k<NK;k++){const sku=SKUS[k];const ser=SER[s][k];const r=FC.series[s][k];
+      for(let d=a;d<b;d++){const v=ser.sales[d];if(v!==v)continue;days++;if(sku.shelf<9999){wasteU+=ser.waste[d];sold+=v;}if(ser.oos[d])oos++;}
+      const p=r.lag1.find(x=>x.week===w);if(p){num+=Math.abs(p.fc-p.act);den+=p.act;bias+=p.fc-p.act;}}}
+    out.push({week:w,wape:den?num/den:NaN,bias:den?bias/den:NaN,wastePct:sold+wasteU?wasteU/(sold+wasteU):NaN,oosPct:days?oos/days:NaN});}
+  return out;
+}
+function storeKpis(s){return kpis({store:s});}
+function catKpis(cat){return kpis({cat});}
+function storeCatWape(s,cat){const a=WEEK0-28,b=WEEK0;let num=0,den=0;for(let k=0;k<NK;k++){if(SKUS[k].cat!==cat)continue;for(const p of FC.series[s][k].lag1){if(p.week*7>=a&&p.week*7<b){num+=Math.abs(p.fc-p.act);den+=p.act;}}}return den?num/den:NaN;}
+
+/* ---- exceptions: what needs a planner's eye this week ---- */
+function exceptions(limit=40){
+  const out=[];
+  for(let s=0;s<NS;s++){const st=STORES[s];if(st.opened>=H)continue;
+    for(let k=0;k<NK;k++){const sku=SKUS[k];const p=proposal(s,k);const r=FC.series[s][k];
+      if(p.flags.includes('stock-out before delivery')){out.push({s,k,type:'Stock-out before delivery',sev:3,impact:p.shortBefore*sku.rev,detail:`${fmtNum(p.onHand)} ${sku.unit} on hand${p.onOrder?' + '+fmtNum(p.onOrder)+' arriving':''}, ${fmtNum(p.bridge)} needed before ${fmtDate(p.D1)}: short ${fmtNum(p.shortBefore)}`,action:'replenish'});}
+      else if(p.flags.includes('expiring stock')){out.push({s,k,type:'Expiring stock',sev:2,impact:p.expiringUnsold*sku.cost,detail:`${fmtNum(p.expiringUnsold)} ${sku.unit} expire before ${fmtDate(p.D1)} with no demand to absorb them`,action:'replenish'});}
+      else if(p.flags.includes('waste risk')&&p.active){out.push({s,k,type:'Waste risk',sev:2,impact:p.expWaste*sku.cost,detail:`${fmtNum(p.expWaste)} ${sku.unit} expected to expire before they sell`,action:'replenish'});}
+      else if(p.flags.includes('overstock')){out.push({s,k,type:'Overstock',sev:1,impact:(p.stockAtD1-p.cycle)*sku.cost,detail:`${fmtNum(p.onHand)} ${sku.unit} on hand, ${(p.onHand/Math.max(0.1,p.cycle/(p.D2-p.D1))).toFixed(0)} days of cover`,action:'replenish'});}
+      // forecast deviation last week
+      const lw=r.lag1[r.lag1.length-1];if(lw&&lw.act>=10&&Math.abs(lw.fc-lw.act)/lw.act>0.45){out.push({s,k,type:lw.fc>lw.act?'Sales below forecast':'Sales above forecast',sev:1,impact:Math.abs(lw.fc-lw.act)*sku.rev,detail:`last week ${fmtNum(lw.act)} sold vs ${fmtNum(lw.fc)} forecast`,action:'forecast'});}
+    }}
+  out.sort((a,b)=>b.sev-a.sev||b.impact-a.impact);
+  return out.slice(0,limit);
+}
+
+/* ---- launches, phase-outs, menu changes, new bars ---- */
+function lifecycleItems(){
+  const items=[];
+  const addAlloc=(k,fromDay,toDay,label)=>{const rows=[];for(let s=0;s<NS;s++){const st=STORES[s];if(st.opened>=toDay)continue;const q=fcSum(s,k,fromDay,toDay);rows.push({s,q,pack:Math.ceil(q/SKUS[k].pack)*SKUS[k].pack});}return rows;};
+  // phase-outs: SKUs with an end date in the horizon, or a window closing with the next menu change
+  const seasonEnd=seasonEndDay(H);const nextSeason=menuSeason(seasonEnd+1);
+  for(const sku of SKUS){
+    if(sku.end!=null&&sku.end>=H-7&&sku.end<H+HORIZON){
+      const rows=[];let leftover=0,leftV=0;for(let s=0;s<NS;s++){const st=STORES[s];if(st.opened>=H)continue;const oh=onHandNow(s,sku.idx)+onOrderNow(s,sku.idx);const dem=fcSum(s,sku.idx,H,sku.end+1);const left=Math.max(0,oh-dem);leftover+=left;leftV+=left*sku.cost;rows.push({s,onHand:oh,dem,left});}
+      items.push({kind:'phase-out',sku,day:sku.end,title:`${sku.name}: last selling day ${fmtDate(sku.end)}`,rows,leftover,leftV,note:'Ordering stopped. Stock left after the end date is waste or a transfer candidate.'});}
+    if(sku.window&&sku.window.includes(menuSeason(H))&&!sku.window.includes(nextSeason)){
+      const rows=[];let leftover=0,leftV=0;for(let s=0;s<NS;s++){const st=STORES[s];if(st.opened>=H)continue;const oh=onHandNow(s,sku.idx)+onOrderNow(s,sku.idx);const dem=fcSum(s,sku.idx,H,seasonEnd+1);const rate=dem/Math.max(1,seasonEnd+1-H);const stopDay=rate>0?Math.max(H,Math.round(seasonEnd+1-oh/rate)):H;rows.push({s,onHand:oh,dem,left:Math.max(0,oh-dem),stopDay});leftover+=Math.max(0,oh-dem);leftV+=Math.max(0,oh-dem)*sku.cost;}
+      items.push({kind:'phase-out',sku,day:seasonEnd,title:`${sku.name}: leaves the menu after ${fmtDate(seasonEnd)} (${MENU_SEASONS.find(x=>x.key===nextSeason).name})`,rows,leftover,leftV,note:'Run-down plan: the proposal only orders what sells before the menu change; per bar, the last order date is shown.'});}
+    if(sku.launch!=null&&sku.launch>=H&&sku.launch<H+HORIZON){
+      const rows=addAlloc(sku.idx,sku.launch,nextDelivery(sku.group,sku.launch+1)+ (sku.group==='ambient'?3:2));let total=0;rows.forEach(r=>total+=r.pack);
+      items.push({kind:'launch',sku,day:sku.launch,title:`${sku.name}: launches ${fmtDate(sku.launch)} (${MENU_SEASONS.find(x=>x.key===nextSeason).name})`,rows,total,
+        note:`No history: forecast from sister SKU ${SKU_BY_ID[sku.analog].name} x ${Math.round(sku.analogRatio*100)}%, ramping over 3 weeks. Initial allocation covers the first delivery cycle per bar.`});}
+    if(sku.window&&!sku.window.includes(menuSeason(H))&&sku.window.includes(nextSeason)&&sku.launch==null){
+      const start=seasonEnd+1;const rows=addAlloc(sku.idx,start,nextDelivery(sku.group,start+1)+3);let total=0;rows.forEach(r=>total+=r.pack);
+      items.push({kind:'launch',sku,day:start,title:`${sku.name}: back on the menu from ${fmtDate(start)}`,rows,total,note:'Returning seasonal item: forecast from last year\'s run, scaled by this year\'s growth.'});}
+    if(sku.rotate){const t=dateOf(H);const nextFirst=Date.UTC(t.getUTCFullYear(),t.getUTCMonth()+1,1);const d=Math.round((nextFirst-START)/DAY);
+      const rows=addAlloc(sku.idx,d,d+7);let total=0;rows.forEach(r=>total+=r.pack);
+      items.push({kind:'rotation',sku,day:d,title:`${sku.name}: new origin from ${fmtDate(d)}`,rows,total,note:'Monthly rotation: first-week uplift (+35%) and a last-week dip (-25%) are built into the forecast, so the previous origin runs down before the switch.'});}
+  }
+  // menu change
+  items.push({kind:'menu',day:seasonEnd+1,title:`${MENU_SEASONS.find(x=>x.key===nextSeason).name} starts ${fmtDate(seasonEnd+1)}`,note:'Four menu changes a year. Items leaving and entering are listed as phase-outs and launches here; the forecast and the proposals already use the dates.'});
+  // new bars
+  for(const st of STORES){if(st.opened>=H&&st.opened<H+HORIZON){const rows=[];let total=0;for(let k=0;k<NK;k++){const sku=SKUS[k];const q=fcSum(st.id,k,st.opened,nextDelivery(sku.group,st.opened+1)+3);if(q>0){const pk=Math.ceil(q/sku.pack)*sku.pack;rows.push({k,q,pack:pk,value:pk*sku.cost});total+=pk*sku.cost;}}
+    items.push({kind:'new-bar',store:st,day:st.opened,title:`${st.name}: opens ${fmtDate(st.opened)}`,rows,total,note:`No history: the opening order uses the ${CLUSTERS[st.cluster].name.toLowerCase()} cluster average per SKU x size index ${st.index.toFixed(2)}, ramping to full volume over 4 weeks.`});}}
+  // promotions ahead
+  const seen=new Set();
+  for(const e of EVENTS){if(e.fromDay>=H&&e.fromDay<H+HORIZON&&!seen.has(e.name+e.fromDay)){seen.add(e.name+e.fromDay);
+    items.push({kind:e.kind==='promo'?'promo':'event',day:e.fromDay,title:`${e.name}: ${fmtDate(e.fromDay)}${e.toDay!==e.fromDay?' to '+fmtDate(e.toDay):''}`,event:e,note:`${e.scope==='network'?'Whole network':e.scope.replace('cluster:','Cluster: ').replace('store:','Bar ')}, ${e.cats?e.cats.join(', '):'all categories'}, x${(e.skus?e.skuMult:e.mult).toFixed(2)} ${e.skus?'on '+e.skus.join(', '):''}. Already in the forecast and the proposals.`});}}
+  items.sort((a,b)=>a.day-b.day);
+  return items;
+}
+
+/* formatting */
+function fmtNum(v,dp){if(v==null||v!==v)return '–';if(dp!=null)return v.toFixed(dp);const a=Math.abs(v);if(a>=1000)return Math.round(v).toLocaleString('en-NL');if(a>=100)return v.toFixed(0);if(a>=10)return v.toFixed(1).replace(/\.0$/,'');return v.toFixed(1).replace(/\.0$/,'');}
+function fmtEur(v){if(v==null||v!==v)return '–';const a=Math.abs(v);if(a>=1e6)return '€'+(v/1e6).toFixed(2)+'M';if(a>=1e4)return '€'+(v/1e3).toFixed(1)+'K';return '€'+Math.round(v).toLocaleString('en-NL');}
+function fmtPct(v,dp=1){if(v==null||v!==v)return '–';return (v*100).toFixed(dp)+'%';}
+function fmtSigned(v,dp=1){if(v==null||v!==v)return '–';return (v>0?'+':'')+(v*100).toFixed(dp)+'%';}
+/* ============================================================
+   Cortado - small SVG chart kit (no dependencies)
+   Line with band + crosshair tooltip, bars, heatmap table,
+   sparkline, scatter. Colors come from CSS tokens.
+   ============================================================ */
+const SVG_NS='http://www.w3.org/2000/svg';
+function svgEl(tag,attrs){const e=document.createElementNS(SVG_NS,tag);for(const k in attrs){if(attrs[k]!=null)e.setAttribute(k,attrs[k]);}return e;}
+function niceTicks(min,max,n=5){if(max<=min)max=min+1;const span=max-min;const raw=span/n;const mag=Math.pow(10,Math.floor(Math.log10(raw)));const norm=raw/mag;const step=(norm<1.5?1:norm<3?2:norm<7?5:10)*mag;const t=[];const start=Math.ceil(min/step)*step;for(let v=start;v<=max+1e-9;v+=step)t.push(+v.toFixed(10));return {ticks:t,step};}
+function compact(v){const a=Math.abs(v);if(a>=1e6)return (v/1e6).toFixed(1)+'M';if(a>=1e4)return Math.round(v/1e3)+'K';if(a>=1e3)return (v/1e3).toFixed(1)+'K';if(a>=100)return Math.round(v).toString();if(a>=10)return (Math.round(v*10)/10).toString();return (Math.round(v*100)/100).toString();}
+function tipEl(container){let t=container.querySelector('.tip');if(!t){t=document.createElement('div');t.className='tip';t.hidden=true;container.appendChild(t);}return t;}
+function clearEl(el){while(el.firstChild)el.removeChild(el.firstChild);}
+
+/* line chart. series: [{name,color,pts:[{x,y}],band:[{x,lo,hi}]?,dashed?}] ; x numeric */
+function lineChart(container,o){
+  clearEl(container);container.classList.add('chart');
+  const W=Math.max(280,container.clientWidth||600),Hh=o.height||240,m={t:14,r:16,b:28,l:44};
+  const svg=svgEl('svg',{width:W,height:Hh,viewBox:`0 0 ${W} ${Hh}`,role:'img','aria-label':o.label||'chart'});
+  let xs=[],ys=[];
+  for(const s of o.series){for(const p of s.pts){if(p.y!=null&&p.y===p.y){xs.push(p.x);ys.push(p.y);}}if(s.band)for(const b of s.band){xs.push(b.x);ys.push(b.hi);ys.push(b.lo);}}
+  if(!xs.length){container.appendChild(svg);return;}
+  const xmin=o.xmin!=null?o.xmin:Math.min(...xs),xmax=o.xmax!=null?o.xmax:Math.max(...xs);
+  const ymax0=Math.max(...ys,0);const {ticks,step}=niceTicks(0,ymax0*1.08,4);const ymax=Math.max(ticks[ticks.length-1],ymax0*1.05)||1;
+  const X=x=>m.l+(x-xmin)/((xmax-xmin)||1)*(W-m.l-m.r),Y=y=>m.t+(1-y/ymax)*(Hh-m.t-m.b);
+  // future shading
+  if(o.shadeFrom!=null&&o.shadeFrom<=xmax){svg.appendChild(svgEl('rect',{x:X(Math.max(xmin,o.shadeFrom)),y:m.t,width:Math.max(0,X(xmax)-X(Math.max(xmin,o.shadeFrom))),height:Hh-m.t-m.b,class:'future'}));}
+  // grid + y labels
+  for(const t of ticks){const y=Y(t);svg.appendChild(svgEl('line',{x1:m.l,x2:W-m.r,y1:y,y2:y,class:'grid'}));const tx=svgEl('text',{x:m.l-6,y:y+4,class:'ax','text-anchor':'end'});tx.textContent=(o.yFmt||compact)(t);svg.appendChild(tx);}
+  svg.appendChild(svgEl('line',{x1:m.l,x2:W-m.r,y1:Y(0),y2:Y(0),class:'axis'}));
+  // x ticks
+  const xt=o.xTicks||[];for(const t of xt){if(t.x<xmin||t.x>xmax)continue;const tx=svgEl('text',{x:X(t.x),y:Hh-8,class:'ax','text-anchor':'middle'});tx.textContent=t.label;svg.appendChild(tx);}
+  // markers (events)
+  let mi=0;for(const mk of (o.markers||[])){if(mk.x<xmin||mk.x>xmax)continue;svg.appendChild(svgEl('line',{x1:X(mk.x),x2:X(mk.x),y1:m.t,y2:Hh-m.b,class:'marker '+(mk.kind||'')}));if(mk.label&&W>=560){const tx=svgEl('text',{x:X(mk.x)+3,y:m.t+9+(mi%3)*11,class:'mk'});tx.textContent=mk.label.length>22?mk.label.slice(0,21)+'…':mk.label;svg.appendChild(tx);mi++;}}
+  // series
+  for(const s of o.series){
+    if(s.band&&s.band.length){let d='';const b=s.band.filter(p=>p.lo===p.lo);for(let i=0;i<b.length;i++)d+=(i?'L':'M')+X(b[i].x).toFixed(1)+' '+Y(b[i].hi).toFixed(1);for(let i=b.length-1;i>=0;i--)d+='L'+X(b[i].x).toFixed(1)+' '+Y(b[i].lo).toFixed(1);svg.appendChild(svgEl('path',{d:d+'Z',class:'band',style:`fill:${s.color}`}));}
+    let d='',pen=false;for(const p of s.pts){if(p.y==null||p.y!==p.y){pen=false;continue;}d+=(pen?'L':'M')+X(p.x).toFixed(1)+' '+Y(p.y).toFixed(1);pen=true;}
+    svg.appendChild(svgEl('path',{d,class:'ln'+(s.dashed?' dashed':''),style:`stroke:${s.color}`}));
+    if(s.endDot){const last=[...s.pts].reverse().find(p=>p.y!=null&&p.y===p.y);if(last)svg.appendChild(svgEl('circle',{cx:X(last.x),cy:Y(last.y),r:4,class:'dot',style:`fill:${s.color}`}));}
+    if(s.dots){for(const p of s.pts){if(p.y==null||p.y!==p.y)continue;svg.appendChild(svgEl('circle',{cx:X(p.x),cy:Y(p.y),r:3.5,class:'dot',style:`fill:${s.color}`}));}}
+  }
+  // hover
+  const cross=svgEl('line',{x1:0,x2:0,y1:m.t,y2:Hh-m.b,class:'cross'});cross.style.display='none';svg.appendChild(cross);
+  const hit=svgEl('rect',{x:m.l,y:m.t,width:W-m.l-m.r,height:Hh-m.t-m.b,fill:'transparent'});svg.appendChild(hit);
+  const tip=tipEl(container);
+  const allX=[...new Set(xs)].sort((a,b)=>a-b);
+  const show=(ev)=>{const r=svg.getBoundingClientRect();const px=ev.clientX-r.left;const xv=xmin+(px-m.l)/(W-m.l-m.r)*(xmax-xmin);let best=allX[0];for(const x of allX){if(Math.abs(x-xv)<Math.abs(best-xv))best=x;}
+    cross.setAttribute('x1',X(best));cross.setAttribute('x2',X(best));cross.style.display='';
+    clearEl(tip);const h=document.createElement('div');h.className='tip-h';h.textContent=(o.xFmt||String)(best);tip.appendChild(h);
+    for(const s of o.series){const p=s.pts.find(q=>q.x===best);if(!p||p.y==null||p.y!==p.y)continue;const row=document.createElement('div');row.className='tip-r';const key=document.createElement('i');key.style.background=s.color;row.appendChild(key);const v=document.createElement('b');v.textContent=(o.yFmt||compact)(p.y);row.appendChild(v);const n=document.createElement('span');n.textContent=s.name;row.appendChild(n);tip.appendChild(row);
+      if(s.band){const b=s.band.find(q=>q.x===best);if(b){const r2=document.createElement('div');r2.className='tip-s';r2.textContent=`range ${(o.yFmt||compact)(b.lo)} to ${(o.yFmt||compact)(b.hi)}`;tip.appendChild(r2);}}}
+    tip.hidden=false;const tw=tip.offsetWidth;let left=X(best)+12;if(left+tw>W-4)left=X(best)-tw-12;tip.style.left=left+'px';tip.style.top=(m.t+4)+'px';};
+  hit.addEventListener('pointermove',show);hit.addEventListener('pointerleave',()=>{tip.hidden=true;cross.style.display='none';});
+  container.appendChild(svg);
+  if(o.legend!==false&&o.series.length>1){const lg=document.createElement('div');lg.className='legend';for(const s of o.series){const it=document.createElement('span');const k=document.createElement('i');k.style.background=s.color;if(s.dashed)k.classList.add('dashed');it.appendChild(k);it.appendChild(document.createTextNode(s.name));lg.appendChild(it);}container.appendChild(lg);}
+}
+
+/* bar chart: labels[], series:[{name,color,values[]}], stacked, horizontal */
+function barChart(container,o){
+  clearEl(container);container.classList.add('chart');
+  const horiz=!!o.horizontal;const n=o.labels.length;
+  const W=Math.max(280,container.clientWidth||600);const rowH=o.rowH||26;const Hh=horiz?Math.max(80,n*rowH+30):(o.height||220);
+  const m=horiz?{t:8,r:40,b:22,l:o.labelW||150}:{t:12,r:12,b:28,l:44};
+  const svg=svgEl('svg',{width:W,height:Hh,viewBox:`0 0 ${W} ${Hh}`,role:'img','aria-label':o.label||'bar chart'});
+  const totals=o.labels.map((_,i)=>o.stacked?o.series.reduce((a,s)=>a+(s.values[i]||0),0):Math.max(...o.series.map(s=>s.values[i]||0)));
+  const vmax0=Math.max(...totals,0);const {ticks}=niceTicks(0,vmax0*1.08,4);const vmax=Math.max(ticks[ticks.length-1],vmax0*1.05)||1;
+  const tip=tipEl(container);
+  const fmt=o.fmt||compact;
+  if(horiz){
+    const L=x=>m.l+x/vmax*(W-m.l-m.r);
+    for(const t of ticks){svg.appendChild(svgEl('line',{x1:L(t),x2:L(t),y1:m.t,y2:Hh-m.b,class:'grid'}));const tx=svgEl('text',{x:L(t),y:Hh-8,class:'ax','text-anchor':'middle'});tx.textContent=fmt(t);svg.appendChild(tx);}
+    o.labels.forEach((lab,i)=>{const y=m.t+i*rowH;const tx=svgEl('text',{x:m.l-8,y:y+rowH/2+4,class:'lbl','text-anchor':'end'});tx.textContent=lab.length>24?lab.slice(0,23)+'…':lab;svg.appendChild(tx);
+      let acc=0;const bh=Math.min(18,rowH-8);
+      o.series.forEach((s,si)=>{const v=s.values[i]||0;if(v<=0)return;const x0=o.stacked?L(acc):m.l,x1=L(o.stacked?acc+v:v);const yy=o.stacked?y+(rowH-bh)/2:y+4+si*(bh/o.series.length);const hh=o.stacked?bh:bh/o.series.length-1;
+        const r=svgEl('rect',{x:x0+(o.stacked&&acc>0?2:0),y:yy,width:Math.max(0,x1-x0-(o.stacked&&acc>0?2:0)),height:hh,class:'bar',style:`fill:${s.color}`});
+        r.addEventListener('pointerenter',(ev)=>{clearEl(tip);const h=document.createElement('div');h.className='tip-h';h.textContent=lab;tip.appendChild(h);const row=document.createElement('div');row.className='tip-r';const b=document.createElement('b');b.textContent=fmt(v);row.appendChild(b);const sp=document.createElement('span');sp.textContent=s.name;row.appendChild(sp);tip.appendChild(row);tip.hidden=false;tip.style.left=Math.min(x1+8,W-140)+'px';tip.style.top=(y-4)+'px';});
+        r.addEventListener('pointerleave',()=>{tip.hidden=true;});svg.appendChild(r);acc+=v;});
+      if(o.valueLabels){const tv=svgEl('text',{x:L(totals[i])+5,y:y+rowH/2+4,class:'val'});tv.textContent=fmt(totals[i]);svg.appendChild(tv);}});
+  }else{
+    const slot=(W-m.l-m.r)/n;const bw=Math.min(24,slot*0.6);const Y=v=>m.t+(1-v/vmax)*(Hh-m.t-m.b);
+    for(const t of ticks){svg.appendChild(svgEl('line',{x1:m.l,x2:W-m.r,y1:Y(t),y2:Y(t),class:'grid'}));const tx=svgEl('text',{x:m.l-6,y:Y(t)+4,class:'ax','text-anchor':'end'});tx.textContent=fmt(t);svg.appendChild(tx);}
+    svg.appendChild(svgEl('line',{x1:m.l,x2:W-m.r,y1:Y(0),y2:Y(0),class:'axis'}));
+    o.labels.forEach((lab,i)=>{const cx=m.l+slot*(i+0.5);const tx=svgEl('text',{x:cx,y:Hh-8,class:'ax','text-anchor':'middle'});tx.textContent=lab;svg.appendChild(tx);
+      let acc=0;const k=o.series.length;const gw=o.stacked?bw:bw/k;
+      o.series.forEach((s,si)=>{const v=s.values[i]||0;if(v<=0)return;const x=o.stacked?cx-bw/2:cx-bw/2+si*gw;const y0=o.stacked?Y(acc):Y(0),y1=Y(o.stacked?acc+v:v);
+        const r=svgEl('rect',{x,y:y1,width:o.stacked?bw:gw-1,height:Math.max(0,y0-y1-(o.stacked&&acc>0?2:0)),class:'bar',style:`fill:${s.color}`});
+        r.addEventListener('pointerenter',()=>{clearEl(tip);const h=document.createElement('div');h.className='tip-h';h.textContent=lab;tip.appendChild(h);const row=document.createElement('div');row.className='tip-r';const b=document.createElement('b');b.textContent=fmt(v);row.appendChild(b);const sp=document.createElement('span');sp.textContent=s.name;row.appendChild(sp);tip.appendChild(row);tip.hidden=false;tip.style.left=Math.min(cx+10,W-150)+'px';tip.style.top=(y1-6)+'px';});
+        r.addEventListener('pointerleave',()=>{tip.hidden=true;});svg.appendChild(r);acc+=v;});
+      if(o.valueLabels){const tv=svgEl('text',{x:cx,y:Y(totals[i])-5,class:'val','text-anchor':'middle'});tv.textContent=fmt(totals[i]);svg.appendChild(tv);}});
+  }
+  container.appendChild(svg);
+  if(o.series.length>1&&o.legend!==false){const lg=document.createElement('div');lg.className='legend';for(const s of o.series){const it=document.createElement('span');const k=document.createElement('i');k.style.background=s.color;k.classList.add('sq');it.appendChild(k);it.appendChild(document.createTextNode(s.name));lg.appendChild(it);}container.appendChild(lg);}
+}
+
+/* heatmap as an HTML table: rows[], cols[], values[r][c] (NaN allowed), fmt, lo/hi for the ramp, invert (higher is worse) */
+function heatmap(container,o){
+  clearEl(container);
+  const wrap=document.createElement('div');wrap.className='scroll';const t=document.createElement('table');t.className='heat';
+  const thead=document.createElement('thead');const hr=document.createElement('tr');hr.appendChild(document.createElement('th'));for(const c of o.cols){const th=document.createElement('th');th.textContent=c;hr.appendChild(th);}thead.appendChild(hr);t.appendChild(thead);
+  const tb=document.createElement('tbody');
+  const vals=o.values.flat().filter(v=>v===v);const lo=o.lo!=null?o.lo:Math.min(...vals),hi=o.hi!=null?o.hi:Math.max(...vals);
+  o.rows.forEach((r,i)=>{const tr=document.createElement('tr');const th=document.createElement('th');th.textContent=r;tr.appendChild(th);
+    o.cols.forEach((c,j)=>{const v=o.values[i][j];const td=document.createElement('td');if(v!==v){td.textContent='–';td.className='na';}else{const p=Math.max(0,Math.min(1,(v-lo)/((hi-lo)||1)));td.style.setProperty('--p',p.toFixed(3));td.textContent=(o.fmt||compact)(v);td.className='cell'+(p>0.6?' deep':'');}
+      if(o.onClick){td.classList.add('click');td.addEventListener('click',()=>o.onClick(i,j));}tr.appendChild(td);});tb.appendChild(tr);});
+  t.appendChild(tb);wrap.appendChild(t);container.appendChild(wrap);
+}
+
+/* sparkline */
+function sparkline(values,w=96,h=26,color='var(--accent)'){
+  const v=values.filter(x=>x===x);if(!v.length)return document.createElement('span');
+  const svg=svgEl('svg',{width:w,height:h,viewBox:`0 0 ${w} ${h}`,class:'spark'});const mx=Math.max(...v),mn=Math.min(...v);
+  const X=i=>2+i/(v.length-1||1)*(w-4),Y=x=>h-3-(x-mn)/((mx-mn)||1)*(h-6);
+  let d='';v.forEach((x,i)=>{d+=(i?'L':'M')+X(i).toFixed(1)+' '+Y(x).toFixed(1);});
+  svg.appendChild(svgEl('path',{d:d+`L${X(v.length-1).toFixed(1)} ${h}L${X(0)} ${h}Z`,class:'spark-fill',style:`fill:${color}`}));
+  svg.appendChild(svgEl('path',{d,class:'spark-ln',style:`stroke:${color}`}));
+  svg.appendChild(svgEl('circle',{cx:X(v.length-1),cy:Y(v[v.length-1]),r:2.5,style:`fill:${color}`}));
+  return svg;
+}
+
+/* scatter: points [{x,y,label,color?}], xFmt,yFmt, refX, refY, xLabel, yLabel */
+function scatter(container,o){
+  clearEl(container);container.classList.add('chart');
+  const W=Math.max(280,container.clientWidth||600),Hh=o.height||260,m={t:14,r:16,b:36,l:48};
+  const svg=svgEl('svg',{width:W,height:Hh,viewBox:`0 0 ${W} ${Hh}`,role:'img','aria-label':o.label||'scatter'});
+  const pts=o.points.filter(p=>p.x===p.x&&p.y===p.y);if(!pts.length){container.appendChild(svg);return;}
+  const xmax=Math.max(...pts.map(p=>p.x),o.refX||0)*1.15||1,ymax=Math.max(...pts.map(p=>p.y),o.refY||0)*1.15||1;
+  const X=x=>m.l+x/xmax*(W-m.l-m.r),Y=y=>m.t+(1-y/ymax)*(Hh-m.t-m.b);
+  const xt=niceTicks(0,xmax,4).ticks,yt=niceTicks(0,ymax,4).ticks;
+  for(const t of yt){svg.appendChild(svgEl('line',{x1:m.l,x2:W-m.r,y1:Y(t),y2:Y(t),class:'grid'}));const tx=svgEl('text',{x:m.l-6,y:Y(t)+4,class:'ax','text-anchor':'end'});tx.textContent=(o.yFmt||compact)(t);svg.appendChild(tx);}
+  for(const t of xt){const tx=svgEl('text',{x:X(t),y:Hh-m.b+14,class:'ax','text-anchor':'middle'});tx.textContent=(o.xFmt||compact)(t);svg.appendChild(tx);}
+  if(o.refX!=null)svg.appendChild(svgEl('line',{x1:X(o.refX),x2:X(o.refX),y1:m.t,y2:Hh-m.b,class:'marker'}));
+  if(o.refY!=null)svg.appendChild(svgEl('line',{x1:m.l,x2:W-m.r,y1:Y(o.refY),y2:Y(o.refY),class:'marker'}));
+  const xl=svgEl('text',{x:(m.l+W-m.r)/2,y:Hh-4,class:'ax','text-anchor':'middle'});xl.textContent=o.xLabel||'';svg.appendChild(xl);
+  const yl=svgEl('text',{x:12,y:(m.t+Hh-m.b)/2,class:'ax','text-anchor':'middle',transform:`rotate(-90 12 ${(m.t+Hh-m.b)/2})`});yl.textContent=o.yLabel||'';svg.appendChild(yl);
+  const tip=tipEl(container);
+  for(const p of pts){const c=svgEl('circle',{cx:X(p.x),cy:Y(p.y),r:p.r||5,class:'dot'+(p.dim?' dim':''),style:`fill:${p.color||'var(--accent)'}`});
+    const hitc=svgEl('circle',{cx:X(p.x),cy:Y(p.y),r:12,fill:'transparent'});
+    hitc.addEventListener('pointerenter',()=>{clearEl(tip);const h=document.createElement('div');h.className='tip-h';h.textContent=p.label;tip.appendChild(h);const r=document.createElement('div');r.className='tip-s';r.textContent=`${o.xLabel||'x'} ${(o.xFmt||compact)(p.x)} · ${o.yLabel||'y'} ${(o.yFmt||compact)(p.y)}`;tip.appendChild(r);tip.hidden=false;tip.style.left=Math.min(X(p.x)+12,W-170)+'px';tip.style.top=(Y(p.y)-10)+'px';});
+    hitc.addEventListener('pointerleave',()=>{tip.hidden=true;});if(o.onClick)hitc.addEventListener('click',()=>o.onClick(p));
+    svg.appendChild(c);svg.appendChild(hitc);
+    if(p.labelAlways){const t=svgEl('text',{x:X(p.x)+8,y:Y(p.y)+4,class:'lbl'});t.textContent=p.label;svg.appendChild(t);}}
+  container.appendChild(svg);
+}
+
+/* data table twin for a chart: headers[], rows[][] */
+function dataTable(container,headers,rows,opts={}){
+  clearEl(container);const wrap=document.createElement('div');wrap.className='scroll';const t=document.createElement('table');t.className='data'+(opts.compact?' compact':'');
+  const thead=document.createElement('thead');const tr=document.createElement('tr');headers.forEach((h,i)=>{const th=document.createElement('th');th.textContent=h;if(i>0)th.className='num';tr.appendChild(th);});thead.appendChild(tr);t.appendChild(thead);
+  const tb=document.createElement('tbody');rows.forEach(r=>{const tr=document.createElement('tr');r.forEach((c,i)=>{const td=document.createElement('td');td.textContent=c;if(i>0)td.className='num';tr.appendChild(td);});tb.appendChild(tr);});t.appendChild(tb);wrap.appendChild(t);container.appendChild(wrap);
+}
+/* ============================================================
+   Cortado - views
+   ============================================================ */
+function h(tag,attrs,...kids){const e=document.createElement(tag);if(attrs)for(const k in attrs){const v=attrs[k];if(v==null)continue;if(k==='class')e.className=v;else if(k.startsWith('on'))e.addEventListener(k.slice(2),v);else if(k==='value')e.value=v;else if(k==='checked')e.checked=!!v;else e.setAttribute(k,v);}for(const c of kids.flat(2)){if(c==null||c===false)continue;e.appendChild(typeof c==='string'||typeof c==='number'?document.createTextNode(c):c);}return e;}
+const VIEWS=[['overview','Overview'],['forecast','Forecast'],['replenish','Replenish'],['launches','Launches & menu'],['bars','Bars'],['accuracy','Accuracy']];
+const state={view:'overview',store:3,cat:'',sku:0,daily:false,group:'all',respectShelf:true,edits:{},barSel:null,ovCat:''};
+const NOTES={key:'cortado.notes.v1',data:{}};try{NOTES.data=JSON.parse(localStorage.getItem(NOTES.key)||'{}')||{};}catch(e){}
+function saveNotes(){try{localStorage.setItem(NOTES.key,JSON.stringify(NOTES.data));}catch(e){}}
+const openStores=()=>STORES.filter(s=>s.opened<H);
+const catColor=(i)=>['var(--s1)','var(--s2)','var(--s3)','var(--s4)','var(--s5)','var(--sky)','var(--grey-series)','var(--ink-2)'][i%8];
+function weekLabel(w){return fmtShort(w*7);}
+function pill(text,kind){return h('span',{class:'pill '+(kind||'neutral')},text);}
+function kpiTile(label,value,delta,sub,target){const d=delta?h('div',{class:'d '+(delta.good?'good':delta.bad?'bad':'')},delta.text):null;return h('div',{class:'kpi'},h('div',{class:'l'},label),h('div',{class:'v'},value),d,sub?h('div',{class:'d'},sub):null,target?h('span',{class:'tgt'},target):null);}
+function deltaPP(cur,prev,lowerIsBetter){if(cur!==cur||prev!==prev)return null;const d=(cur-prev)*100;const txt=(d>0?'+':'')+d.toFixed(1)+' pp vs previous 4 wk';return {text:txt,good:lowerIsBetter?d<-0.2:d>0.2,bad:lowerIsBetter?d>0.2:d<-0.2};}
+function select(opts,value,onchange,attrs){const s=h('select',Object.assign({onchange:(e)=>onchange(e.target.value)},attrs||{}));for(const [v,l] of opts){const o=h('option',{value:v},l);if(String(v)===String(value))o.selected=true;s.appendChild(o);}return s;}
+function sectionCard(title,hint,...body){return h('div',{class:'card'},h('div',{class:'card-h'},h('h3',null,title),hint?h('span',{class:'hint'},hint):null),...body);}
+
+/* aggregate helpers */
+function sumStores(fn){let t=0;for(const st of openStores())t+=fn(st.id);return t;}
+function networkWeekly(cat,storeId){ // returns {weeks:[{w,act,lag1,fc,lo,hi}]}
+  const stores=storeId!=null&&storeId!=='all'?[STORES[+storeId]]:openStores();const ks=SKUS.filter(k=>!cat||k.cat===cat).map(k=>k.idx);
+  const out=[];
+  for(let w=weekOf(WEEK0)-14;w<=weekOf(WEEK0)+9;w++){let act=NaN,lag=NaN,fc=NaN,v=0;
+    if(w<weekOf(WEEK0)){act=0;let anyLag=false;lag=0;for(const st of stores)for(const k of ks){const y=FC.ys[st.id][k];for(let d=w*7;d<w*7+7;d++){if(y[d]===y[d])act+=y[d];}const p=FC.series[st.id][k].lag1.find(x=>x.week===w);if(p){lag+=p.fc;anyLag=true;}}if(!anyLag)lag=NaN;}
+    else{fc=0;for(const st of stores)for(const k of ks){fc+=weekActualPlusFc(st.id,k,w);const r=FC.series[st.id][k];for(let d=Math.max(H,w*7);d<w*7+7;d++){const j=d-H;if(j<HORIZON){const sd=(r.hi[j]-r.daily[j])/1.28;v+=sd*sd;}}}}
+    out.push({w,act,lag,fc,lo:fc===fc?Math.max(0,fc-1.28*Math.sqrt(v)):NaN,hi:fc===fc?fc+1.28*Math.sqrt(v):NaN});}
+  return out;
+}
+function eventMarkers(fromDay,toDay){const seen=new Set();const m=[];for(const e of EVENTS){if(e.fromDay>=fromDay&&e.fromDay<=toDay&&!seen.has(e.name)){seen.add(e.name);m.push({x:e.fromDay/7,label:e.name,kind:e.kind==='promo'?'promo':''});}}
+  for(const sku of SKUS){if(sku.launch!=null&&sku.launch>=fromDay&&sku.launch<=toDay)m.push({x:sku.launch/7,label:'Launch: '+sku.name.split(' ')[0],kind:'launch'});if(sku.end!=null&&sku.end>=fromDay&&sku.end<=toDay)m.push({x:sku.end/7,label:'Phase-out: '+sku.name.split(' ')[0],kind:'launch'});}
+  const se=seasonEndDay(H)+1;if(se>=fromDay&&se<=toDay)m.push({x:se/7,label:MENU_SEASONS.find(x=>x.key===menuSeason(se)).name,kind:'launch'});
+  for(const st of STORES){if(st.opened>=fromDay&&st.opened<=toDay)m.push({x:st.opened/7,label:'Opens: '+st.short,kind:'launch'});}
+  return m;}
+
+/* ---------------- Overview ---------------- */
+function viewOverview(root){
+  const k=kpis(),p=kpis({},WEEK0-56,WEEK0-28);
+  root.appendChild(h('div',{class:'kpis'},
+    kpiTile('Forecast accuracy',fmtPct(1-k.wape,0),deltaPP(k.wape,p.wape,true),'1 minus WAPE, 1 week ahead, bar x SKU, last 4 wk','target 88%+'),
+    kpiTile('Forecast bias',fmtSigned(k.bias),null,k.bias>0.01?'forecasting above sales':k.bias<-0.01?'forecasting below sales':'no systematic bias','keep within ±2%'),
+    kpiTile('Availability',fmtPct(k.availability,1),deltaPP(k.oosPct,p.oosPct,true),'bar-SKU-days in stock, excl. fresh bakery','target 97%+'),
+    kpiTile('Lost sales',fmtEur(k.lostV),null,`${fmtNum(k.lost)} units short across the network, 4 wk`,'from stock-out days'),
+    kpiTile('Waste',fmtPct(k.wastePct),deltaPP(k.wastePct,p.wastePct,true),`${fmtEur(k.wasteV)} at cost, perishables, 4 wk`,'target under 5%'),
+    kpiTile('Fresh sell-out rate',fmtPct(k.freshSellout,0),deltaPP(k.freshSellout,p.freshSellout,true),`bakery days sold out; waste ${fmtPct(k.freshWaste,0)}`,'healthy band 25 to 35%'),
+  ));
+  // weekly chart
+  const chartCard=h('div',{class:'card'});const ctrl=select([['','All categories'],...CATEGORIES.map(c=>[c,c])],state.ovCat,(v)=>{state.ovCat=v;render();});
+  chartCard.appendChild(h('div',{class:'card-h'},h('h3',null,'Network demand, weekly units'),h('div',{class:'row'},h('span',{class:'hint'},'14 weeks sold, 10 weeks ahead'),ctrl)));
+  const chartEl=h('div');chartCard.appendChild(chartEl);
+  const wk=networkWeekly(state.ovCat,'all');
+  const act=wk.filter(x=>x.act===x.act).map(x=>({x:x.w,y:x.act})),lag=wk.filter(x=>x.lag===x.lag).map(x=>({x:x.w,y:x.lag}));
+  const fc=wk.filter(x=>x.fc===x.fc).map(x=>({x:x.w,y:x.fc}));const last=act[act.length-1];if(last)fc.unshift({x:last.x,y:last.y});
+  const band=wk.filter(x=>x.fc===x.fc).map(x=>({x:x.w,lo:x.lo,hi:x.hi}));if(last)band.unshift({x:last.x,lo:last.y,hi:last.y});
+  const markers=eventMarkers(H,H+HORIZON).slice(0,6);
+  const draw=()=>lineChart(chartEl,{height:250,shadeFrom:weekOf(WEEK0),xFmt:(x)=>'Week of '+weekLabel(x),xTicks:wk.filter((x,i)=>i%3===0).map(x=>({x:x.w,label:weekLabel(x.w)})),markers,
+    series:[{name:'Sold (stock-out corrected)',color:'var(--s1)',pts:act,endDot:true},{name:'Forecast made 1 week ahead',color:'var(--grey-series)',pts:lag,dashed:true},{name:'Forecast',color:'var(--s1)',pts:fc,dashed:true,band}]});
+  requestAnimationFrame(draw);
+  // category movement
+  const mv=h('div',{class:'card'});mv.appendChild(h('div',{class:'card-h'},h('h3',null,'Next 4 weeks vs last 4 weeks'),h('span',{class:'hint'},'forecast units by category')));
+  const list=h('div',{class:'mini-bars'});
+  const rowsMv=CATEGORIES.map(c=>{let past=0,next=0;for(const st of openStores())for(const sku of SKUS){if(sku.cat!==c)continue;past+=sumRange(FC.ys[st.id][sku.idx],WEEK0-28,WEEK0);next+=fcSum(st.id,sku.idx,H,H+28);}return {c,chg:past>0?next/past-1:NaN,past,next};});
+  const mx=Math.max(...rowsMv.map(r=>Math.abs(r.chg)).filter(v=>v===v),0.1);
+  for(const r of rowsMv){const bar=h('div',{class:'bar-dv'});const w=Math.min(100,Math.abs(r.chg)/mx*100);const i=h('i',{style:`width:${(w/2).toFixed(1)}%;margin-left:${r.chg<0?(50-w/2).toFixed(1):50}%;background:${r.chg<0?'var(--s2)':'var(--s1)'}`});bar.appendChild(i);list.appendChild(h('div',{class:r.chg>0?'best':''},h('span',{style:'text-align:left'},r.c),bar,h('span',null,fmtSigned(r.chg,0))));}
+  mv.appendChild(list);mv.appendChild(h('p',{class:'small muted',style:'margin-top:10px'},'Cold drinks fall with the temperature, retail beans rise into Black Friday and Sinterklaas, syrups turn over with the winter menu. All of it is in the proposals already.'));
+  root.appendChild(h('div',{class:'grid g2'},chartCard,mv));
+  // exceptions
+  const ex=exceptions(14);
+  const tbl=h('table',{class:'data'},h('thead',null,h('tr',null,h('th',null,'Bar'),h('th',null,'SKU'),h('th',null,'Issue'),h('th',{class:'num'},'Impact'),h('th',null,'Detail'),h('th',null,''))),
+    h('tbody',null,ex.map(e=>h('tr',{class:e.sev===3?'crit':e.sev===2?'warn':''},h('td',null,STORES[e.s].short),h('td',{class:'sku'},h('b',null,SKUS[e.k].name),h('span',null,SKUS[e.k].cat)),h('td',null,pill(e.type,e.sev===3?'crit':e.sev===2?'warn':'info')),h('td',{class:'num'},fmtEur(e.impact)),h('td',{class:'small'},e.detail),
+      h('td',null,h('button',{class:'btn sm',onclick:()=>e.action==='replenish'?nav('replenish',{store:e.s}):nav('forecast',{store:e.s,sku:e.k,cat:SKUS[e.k].cat})},e.action==='replenish'?'Open order':'Open forecast'))))));
+  root.appendChild(sectionCard('Needs a planner today',`${ex.length} shown, sorted by severity and value at risk`,h('div',{class:'scroll'},tbl)));
+  // upcoming
+  const items=lifecycleItems().filter(i=>i.day>=H).slice(0,6);
+  root.appendChild(sectionCard('Coming up','launches, phase-outs, promotions and openings already built into the forecast',h('div',{class:'timeline'},items.map(i=>h('div',{class:'tl'},h('div',{class:'when'},fmtShort(i.day),h('small',null,DOW_NAMES[dow(i.day)]+', in '+(i.day-H)+' days')),h('div',null,h('div',{class:'row'},pill(i.kind,i.kind==='launch'||i.kind==='new-bar'?'good':i.kind==='phase-out'?'warn':'info'),h('span',{class:'ttl'},i.title)),h('p',{class:'small muted'},i.note))))),h('div',{style:'margin-top:10px'},h('button',{class:'btn sm',onclick:()=>nav('launches')},'All launches and menu changes'))));
+}
+
+/* ---------------- Forecast ---------------- */
+function viewForecast(root){
+  const skuOpts=SKUS.filter(k=>!state.cat||k.cat===state.cat);if(!skuOpts.find(k=>k.idx===state.sku))state.sku=skuOpts[0].idx;
+  const sku=SKUS[state.sku];const all=state.store==='all';const stores=all?openStores():[STORES[+state.store]];
+  const filters=h('div',{class:'card flat filters'},
+    h('label',null,'Bar',select([['all','All bars'],...STORES.map(s=>[s.id,s.short+(s.opened>=H?' (planned)':'')])],state.store,(v)=>{state.store=v==='all'?'all':+v;render();})),
+    h('label',null,'Category',select([['','All'],...CATEGORIES.map(c=>[c,c])],state.cat,(v)=>{state.cat=v;render();})),
+    h('label',null,'SKU',select(skuOpts.map(k=>[k.idx,k.name]),state.sku,(v)=>{state.sku=+v;render();})),
+    h('div',{class:'seg'},h('button',{'aria-pressed':String(!state.daily),onclick:()=>{state.daily=false;render();}},'Weekly'),h('button',{'aria-pressed':String(state.daily),onclick:()=>{state.daily=true;render();}},'Daily')));
+  root.appendChild(filters);
+  const chartCard=h('div',{class:'card'});const chartEl=h('div');const tableEl=h('div',{style:'margin-top:10px'});tableEl.hidden=true;
+  const store0=stores[0];const r0=FC.series[store0.id][sku.idx];
+  chartCard.appendChild(h('div',{class:'card-h'},h('h3',null,`${sku.name} · ${all?'all bars':store0.name}`),h('div',{class:'row'},h('span',{class:'hint'},state.daily?'last 28 days and 21 days ahead':'16 weeks sold and 10 weeks ahead'),h('button',{class:'btn sm ghost',onclick:(e)=>{tableEl.hidden=!tableEl.hidden;e.target.textContent=tableEl.hidden?'Show table':'Hide table';}},'Show table'))));
+  chartCard.appendChild(chartEl);chartCard.appendChild(tableEl);
+  if(!state.daily){
+    const rows=[];for(let w=weekOf(WEEK0)-16;w<=weekOf(WEEK0)+9;w++){let act=NaN,lag=NaN,fc=NaN,v=0,raw=NaN;
+      if(w<weekOf(WEEK0)){act=0;raw=0;let any=false;lag=0;for(const st of stores){const y=FC.ys[st.id][sku.idx],sl=SER[st.id][sku.idx].sales;for(let d=w*7;d<w*7+7;d++){if(y[d]===y[d]){act+=y[d];raw+=sl[d];}}const p=FC.series[st.id][sku.idx].lag1.find(x=>x.week===w);if(p){lag+=p.fc;any=true;}}if(!any)lag=NaN;}
+      else{fc=0;for(const st of stores){fc+=weekActualPlusFc(st.id,sku.idx,w);const r=FC.series[st.id][sku.idx];for(let d=Math.max(H,w*7);d<w*7+7;d++){const j=d-H;if(j<HORIZON){const sd=(r.hi[j]-r.daily[j])/1.28;v+=sd*sd;}}}}
+      rows.push({w,act,raw,lag,fc,lo:fc===fc?Math.max(0,fc-1.28*Math.sqrt(v)):NaN,hi:fc===fc?fc+1.28*Math.sqrt(v):NaN});}
+    const act=rows.filter(x=>x.act===x.act).map(x=>({x:x.w,y:x.act})),rawp=rows.filter(x=>x.raw===x.raw).map(x=>({x:x.w,y:x.raw})),lag=rows.filter(x=>x.lag===x.lag).map(x=>({x:x.w,y:x.lag}));
+    const fc=rows.filter(x=>x.fc===x.fc).map(x=>({x:x.w,y:x.fc}));const last=act[act.length-1];if(last)fc.unshift({x:last.x,y:last.y});
+    const band=rows.filter(x=>x.fc===x.fc).map(x=>({x:x.w,lo:x.lo,hi:x.hi}));if(last)band.unshift({x:last.x,lo:last.y,hi:last.y});
+    const markers=eventMarkers(WEEK0-16*7,H+HORIZON).filter(m=>{const d=Math.round(m.x*7);const st=stores[0];return all?true:(knownFactors(st,sku,d).m!==1||/Launch|Phase|menu|Opens/.test(m.label));}).slice(0,10);
+    requestAnimationFrame(()=>lineChart(chartEl,{height:270,shadeFrom:weekOf(WEEK0),xFmt:(x)=>'Week of '+weekLabel(x),xTicks:rows.filter((x,i)=>i%3===0).map(x=>({x:x.w,label:weekLabel(x.w)})),markers,yFmt:(v)=>compact(v),
+      series:[{name:'Sold (stock-out corrected)',color:'var(--s1)',pts:act,endDot:true},{name:'Sold (as recorded)',color:'var(--sky)',pts:rawp},{name:'Forecast made 1 week ahead',color:'var(--grey-series)',pts:lag,dashed:true},{name:'Forecast with 80% range',color:'var(--s1)',pts:fc,dashed:true,band}]}));
+    dataTable(tableEl,['Week of','Sold (corrected)','Sold (recorded)','1-wk-ahead forecast','Forecast','Low','High'],rows.map(x=>[weekLabel(x.w),fmtNum(x.act),fmtNum(x.raw),fmtNum(x.lag),fmtNum(x.fc),fmtNum(x.lo),fmtNum(x.hi)]),{compact:true});
+  }else{
+    const pts=[],rawp=[],fc=[],band=[],oosM=[];for(let d=H-28;d<H+21;d++){let a=NaN,raw=NaN,f=NaN,v=0,anyOos=false;
+      if(d<H){a=0;raw=0;for(const st of stores){const y=FC.ys[st.id][sku.idx];if(y[d]===y[d]){a+=y[d];raw+=SER[st.id][sku.idx].sales[d];if(SER[st.id][sku.idx].oos[d])anyOos=true;}}}
+      else{f=0;for(const st of stores){f+=fcDay(st.id,sku.idx,d);const r=FC.series[st.id][sku.idx];const sd=(r.hi[d-H]-r.daily[d-H])/1.28;v+=sd*sd;}}
+      if(a===a){pts.push({x:d,y:a});rawp.push({x:d,y:raw});if(anyOos&&!all)oosM.push({x:d,label:'',kind:''});}if(f===f){fc.push({x:d,y:f});band.push({x:d,lo:Math.max(0,f-1.28*Math.sqrt(v)),hi:f+1.28*Math.sqrt(v)});}}
+    const last=pts[pts.length-1];if(last){fc.unshift({x:last.x,y:last.y});band.unshift({x:last.x,lo:last.y,hi:last.y});}
+    requestAnimationFrame(()=>lineChart(chartEl,{height:270,shadeFrom:H,xFmt:(x)=>fmtDate(x),xTicks:pts.concat(fc).filter(p=>dow(p.x)===0).map(p=>({x:p.x,label:fmtShort(p.x)})),markers:oosM.slice(0,20),yFmt:(v)=>compact(v),
+      series:[{name:'Sold (stock-out corrected)',color:'var(--s1)',pts,endDot:true},{name:'Sold (as recorded)',color:'var(--sky)',pts:rawp},{name:'Forecast with 80% range',color:'var(--s1)',pts:fc,dashed:true,band}]}));
+    chartCard.appendChild(h('p',{class:'small muted',style:'margin-top:6px'},'Dotted vertical lines mark days the bar sold out: recorded sales understate demand there, so the model trains on the corrected line.'));
+    dataTable(tableEl,['Day','Sold (corrected)','Sold (recorded)','Forecast','Low','High'],pts.map(p=>[fmtDate(p.x),fmtNum(p.y),fmtNum(rawp.find(q=>q.x===p.x).y),'','','']).concat(fc.slice(1).map(p=>{const b=band.find(q=>q.x===p.x);return [fmtDate(p.x),'','',fmtNum(p.y),fmtNum(b.lo),fmtNum(b.hi)];})),{compact:true});
+  }
+  // model panel
+  const panel=h('div',{class:'stack'});
+  if(all){const counts={};for(const st of stores){const m=FC.series[st.id][sku.idx].method;counts[m]=(counts[m]||0)+1;}
+    const mb=h('div',{class:'mini-bars'});const mxc=Math.max(...Object.values(counts));for(const [m,c] of Object.entries(counts).sort((a,b)=>b[1]-a[1])){mb.appendChild(h('div',{class:c===mxc?'best':''},h('span',{style:'text-align:left'},METHOD_NAMES[m]),h('i',{style:`width:${(c/mxc*100).toFixed(0)}%`}),h('span',null,c+' bars')));}
+    panel.appendChild(sectionCard('Model per bar','each bar x SKU picks the method that backtests best',mb,h('p',{class:'small muted',style:'margin-top:8px'},'Select one bar to see its backtest, drivers and to set an override.')));
+  }else{
+    const r=r0;const w=r.wape;const names=Object.keys(w).filter(m=>w[m]===w[m]).sort((a,b)=>w[a]-w[b]);
+    const mb=h('div',{class:'mini-bars'});const mxw=Math.max(...names.map(m=>w[m]),0.01);
+    for(const m of names){mb.appendChild(h('div',{class:m===r.method?'best':''},h('span',{style:'text-align:left'},METHOD_NAMES[m]),h('i',{style:`width:${(w[m]/mxw*100).toFixed(0)}%`}),h('span',null,fmtPct(w[m],0))));}
+    const body=[h('p',{class:'small'},h('b',null,'In use: '+METHOD_NAMES[r.method]+'. '),r.method==='ANALOG'?(r.isNew?'The bar has not opened yet, so the forecast is the cluster average scaled by the bar\'s size index, ramping up over 4 weeks.':r.isLaunch?`No history yet: sister SKU ${SKU_BY_ID[sku.analog]?SKU_BY_ID[sku.analog].name:''} x ${Math.round(sku.analogRatio*100)}%, ramping over 3 weeks.`:'Not enough history for a statistical fit; cluster analog in use.'):`Backtest WAPE on two 4-week folds (origins ${fmtShort(FOLDS[0])} and ${fmtShort(FOLDS[1])}); lower is better.`)];
+    if(names.length)body.push(mb);
+    if(r.analogShare>0&&r.analogShare<1)body.push(h('p',{class:'small muted'},`${Math.round(r.analogShare*100)}% of the forecast still comes from the cluster analog (${r.weeksHist.toFixed(0)} weeks of history); the weight shifts to the bar's own data as it accumulates.`));
+    panel.appendChild(sectionCard('Model','',...body));
+    // drivers
+    const prof=r.prof;const pmax=Math.max(...prof);const dowb=h('div',{class:'dowbar'},prof.map((v,i)=>h('div',{style:`height:${(v/pmax*100).toFixed(0)}%`},h('span',null,DOW_NAMES[i]))));
+    const ahead=[];const seen=new Set();for(let d=H;d<H+HORIZON;d++){const kf=knownFactors(store0,sku,d);for(const n of kf.names){if(!seen.has(n)){seen.add(n);const e=EVENTS.find(x=>x.name===n&&d>=x.fromDay&&d<=x.toDay);ahead.push({name:n,day:d,mult:e?eventMult(e,sku):1.15});}}}
+    const lc=[];if(sku.window)lc.push(`On the menu in ${sku.window.join(' and ')} only (menu changes ${fmtShort(seasonEndDay(H)+1)}).`);if(sku.launch!=null)lc.push(`Launches ${fmtDate(sku.launch)}.`);if(sku.end!=null)lc.push(`Last selling day ${fmtDate(sku.end)}; ordering stopped.`);if(sku.rotate)lc.push('Rotates monthly: +35% in the first week of each origin, -25% in the last.');
+    const wxNext=r.weatherSlope?(()=>{let s=0;for(let d=H;d<H+10;d++)s+=tempForecast(d)-climTemp(d);return s/10;})():0;
+    panel.appendChild(sectionCard('Drivers','what the model found in this series',
+      h('dl',{class:'kv'},h('dt',null,'Level'),h('dd',null,`${fmtNum(r.level)} ${sku.unit}/day`),h('dt',null,'Trend'),h('dd',null,r.method==='ANALOG'?'–':`${fmtSigned(r.trendWk)} per week`),h('dt',null,'History'),h('dd',null,`${r.weeksHist.toFixed(0)} weeks`),h('dt',null,'Noise'),h('dd',null,`sd ${fmtNum(r.sdDaily)} ${sku.unit}/day`),
+        h('dt',null,'Weather'),h('dd',null,r.weatherSlope?`${fmtSigned(r.weatherSlope)} per °C vs normal; next 10 days ${wxNext>=0?'+':''}${wxNext.toFixed(1)} °C`:'no measurable effect')),
+      h('div',{class:'eyebrow',style:'margin-top:10px'},'Weekday shape'),dowb,
+      h('div',{class:'eyebrow'},'Events ahead'),ahead.length?h('ul',{class:'small',style:'margin:4px 0 0;padding-left:18px'},ahead.map(a=>h('li',null,`${a.name} from ${fmtShort(a.day)}: x${a.mult.toFixed(2)}`))):h('p',{class:'small muted'},'none in the next 10 weeks'),
+      lc.length?h('div',{class:'note',style:'margin-top:8px'},lc.join(' ')):null));
+  }
+  // override
+  const ovTargets=all?stores.map(s=>s.id):[store0.id];const cur=getOverride(ovTargets[0],sku.idx);
+  const mult=h('input',{type:'number',step:'5',min:'10',max:'300',value:cur?Math.round(cur.mult*100):100,style:'width:80px',id:'ov-mult'});
+  const until=select([['',  'whole horizon'],...[2,4,6,8].map(n=>[H+n*7-1,'next '+n+' weeks'])],cur&&cur.untilDay!=null?cur.untilDay:'',()=>{},{id:'ov-until'});
+  const note=h('textarea',{rows:2,placeholder:'Why? e.g. "store manager expects road works from 9 Nov" or "Marketing confirmed the Filter Friday push"',id:'ov-note'});if(cur)note.value=cur.note||'';
+  const apply=()=>{const m=Math.max(0.1,(+mult.value||100)/100);const u=until.value===''?null:+until.value;for(const sid of ovTargets)setOverride(sid,sku.idx,{mult:m,untilDay:u,note:note.value.trim(),at:ymd(H),author:'Planner'});render();};
+  const clear=()=>{for(const sid of ovTargets)setOverride(sid,sku.idx,null);render();};
+  const allOv=Object.entries(OVR.data).map(([key,o])=>{const [s,k]=key.split('|').map(Number);return {s,k,o};});
+  panel.appendChild(sectionCard('Planner override',all?'applies to every bar for this SKU':'this bar and SKU only',
+    cur?h('div',{class:'note'},`Active: x${cur.mult.toFixed(2)} ${cur.untilDay!=null?'until '+fmtDate(cur.untilDay):'for the whole horizon'}${cur.note?' · '+cur.note:''}`):h('p',{class:'small muted'},'The statistical forecast is in use. Use an override when you know something the data does not: store feedback, a local event, a marketing push, a supply issue.'),
+    h('div',{class:'row',style:'margin-top:8px'},h('label',{class:'small'},'Forecast at ',mult,' %'),h('label',{class:'small'},'for ',until)),note,
+    h('div',{class:'row',style:'margin-top:8px'},h('button',{class:'btn primary',onclick:apply},cur?'Update override':'Apply override'),cur?h('button',{class:'btn ghost',onclick:clear},'Remove'):null),
+    allOv.length?h('div',{style:'margin-top:12px'},h('div',{class:'eyebrow'},'All active overrides'),h('div',{class:'ovr-list',style:'margin-top:6px'},allOv.slice(0,12).map(x=>h('div',null,h('b',null,STORES[x.s].short),h('span',null,SKUS[x.k].name),pill('x'+x.o.mult.toFixed(2),'info'),h('span',{class:'muted small'},x.o.note||''),h('button',{class:'btn sm ghost',onclick:()=>{setOverride(x.s,x.k,null);render();}},'remove'))))):null));
+  root.appendChild(h('div',{class:'grid g2'},chartCard,panel));
+}
+
+/* ---------------- Replenish ---------------- */
+function viewReplenish(root){
+  if(state.store==='all')state.store=3;const st=STORES[+state.store];
+  if(st.opened>=H){root.appendChild(h('div',{class:'card'},h('p',null,`${st.name} opens ${fmtDate(st.opened)}. Its opening order is on the Launches page.`),h('button',{class:'btn sm',style:'margin-top:8px',onclick:()=>nav('launches')},'Go to launches')));}
+  const props=storeProposals(st.id,{respectShelf:state.respectShelf});
+  const groups={all:'All deliveries',daily:'Fresh bakery, '+fmtDate(nextDelivery('daily',H+1)),chilled:'Chilled, '+fmtDate(nextDelivery('chilled',H+1)),ambient:'Ambient, '+fmtDate(nextDelivery('ambient',H+1))};
+  const edits=state.edits[st.id]||(state.edits[st.id]={});
+  const rows=props.filter(p=>state.group==='all'||p.sku.group===state.group);
+  const qtyOf=(p)=>edits[p.k]!=null?edits[p.k]:p.q;
+  let lines=0,units=0,value=0,crit=0,warn=0;for(const p of rows){const q=qtyOf(p);if(q>0){lines++;units+=q;value+=q*p.sku.cost;}if(p.status==='critical')crit++;if(p.status==='warning')warn++;}
+  const filters=h('div',{class:'card flat filters'},
+    h('label',null,'Bar',select(STORES.map(s=>[s.id,s.short+(s.opened>=H?' (planned)':'')]),st.id,(v)=>{state.store=+v;render();})),
+    h('label',null,'Delivery',select(Object.entries(groups),state.group,(v)=>{state.group=v;render();})),
+    h('label',{class:'toggle'},h('input',{type:'checkbox',checked:state.respectShelf,onchange:(e)=>{state.respectShelf=e.target.checked;render();}}),'Cap orders at shelf life'),
+    h('span',{class:'muted small'},`Order cut-off today 12:00 · ${lines} lines · ${fmtNum(units)} units · ${fmtEur(value)} at cost`),
+    h('div',{class:'row',style:'margin-left:auto'},crit?pill(crit+' critical','crit'):null,warn?pill(warn+' to check','warn'):null,
+      h('button',{class:'btn sm ghost',onclick:()=>{state.edits[st.id]={};render();}},'Reset edits'),
+      h('button',{class:'btn sm primary',onclick:(e)=>{const csv=['bar,sku,name,delivery_group,delivery_date,qty,unit,pack,on_hand,arriving,cycle_demand,min_level,flags'];for(const p of rows){const q=qtyOf(p);if(q>0)csv.push([st.name,p.sku.id,'"'+p.sku.name+'"',p.sku.group,ymd(p.D1),q,p.sku.unit,p.sku.pack,p.onHand,p.onOrder,p.cycle.toFixed(1),p.minLevel.toFixed(1),'"'+p.flags.join('; ')+'"'].join(','));}
+        const txt=csv.join('\n');const done=()=>{e.target.textContent='Copied';setTimeout(()=>e.target.textContent='Copy order as CSV',1500);};
+        if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done).catch(()=>{const ta=h('textarea',{value:txt});document.body.appendChild(ta);ta.select();try{document.execCommand('copy');}catch(x){}ta.remove();done();});}}},'Copy order as CSV')));
+  root.appendChild(filters);
+  const thead=h('thead',null,h('tr',null,h('th',null,'SKU'),h('th',null,'Delivery'),h('th',{class:'num'},'On hand'),h('th',{class:'num'},'Arriving'),h('th',{class:'num'},'Until delivery'),h('th',{class:'num'},'Cycle demand'),h('th',{class:'num'},'Safety'),h('th',{class:'num'},'Min level'),h('th',{class:'num'},'Proposed'),h('th',{class:'num'},'Order'),h('th',{class:'num'},'Sell-out risk'),h('th',{class:'num'},'Exp. waste'),h('th',null,'Flags')));
+  const tbody=h('tbody');
+  for(const p of rows){
+    const inp=h('input',{class:'qty'+(edits[p.k]!=null?' changed':''),type:'number',min:'0',step:String(p.sku.pack),value:qtyOf(p),id:'q-'+st.id+'-'+p.k,onchange:(e)=>{edits[p.k]=Math.max(0,+e.target.value||0);render();}});
+    const tr=h('tr',{class:(p.status==='critical'?'crit':p.status==='warning'?'warn':'')+' click'},
+      h('td',{class:'sku'},h('b',null,p.sku.name),h('span',null,`${p.sku.cat} · pack ${p.sku.pack} ${p.sku.unit}${p.sku.shelf<9999?' · '+p.sku.shelf+'d shelf life':''}`)),
+      h('td',{class:'small nw'},fmtShort(p.D1)+' to '+fmtShort(p.D2-1)),h('td',{class:'num'},fmtNum(p.onHand)),h('td',{class:'num'},p.onOrder?fmtNum(p.onOrder):'–'),h('td',{class:'num'},p.active?fmtNum(p.bridge):'–'),h('td',{class:'num'},p.active?fmtNum(p.cycle):'–'),h('td',{class:'num'},p.active?fmtNum(p.ss):'–'),h('td',{class:'num'},p.active?fmtNum(p.minLevel):'–'),h('td',{class:'num'},h('b',null,p.q)),h('td',{class:'num'},inp),
+      h('td',{class:'num'},p.active?fmtPct(p.oosProb,0):'–'),h('td',{class:'num'},p.sku.shelf<9999?fmtNum(p.expWaste):'–'),h('td',null,h('div',{class:'pills'},p.flags.map(f=>pill(f,f==='stock-out before delivery'?'crit':f==='waste risk'||f==='overstock'||f==='run-down stock'||f==='expiring stock'?'warn':f==='shelf-life cap'?'info':'neutral')))));
+    tr.addEventListener('click',(ev)=>{if(ev.target.tagName==='INPUT')return;const next=tr.nextSibling;if(next&&next.classList.contains('detail')){next.remove();return;}
+      const det=h('tr',{class:'detail'});const td=h('td',{colspan:'13'});
+      const proj=[];let pos=p.onHand;for(let d=H;d<H+14;d++){for(const o of SER[st.id][p.k].onOrder){if(o.arrive===d)pos+=o.qty;}if(d===p.D1)pos+=qtyOf(p);pos-=fcDay(st.id,p.k,d);proj.push(Math.max(0,pos));}
+      const expl=p.active?`${p.shortBefore>0?'Short about '+fmtNum(p.shortBefore)+' '+p.sku.unit+' before the delivery: ask the hub for a top-up or transfer from a nearby bar. ':''}${p.expiringUnsold>0?fmtNum(p.expiringUnsold)+' '+p.sku.unit+' on hand expire before the delivery and are not counted. ':''}Demand from today until the delivery lands on ${fmtDate(p.D1)}: ${fmtNum(p.bridge)} ${p.sku.unit}. The delivery must cover ${fmtDate(p.D1)} to ${fmtDate(p.D2-1)}: ${fmtNum(p.cycle)} ${p.sku.unit}, plus safety stock ${fmtNum(p.ss)} for a ${Math.round(p.service*100)}% ${p.sku.shelf<=3?'critical ratio (margin vs cost of a wasted unit)':'service level'}. Position at delivery ${fmtNum(p.stockAtD1)}, so order ${fmtNum(p.raw)} rounded to packs of ${p.sku.pack} = ${p.q}.${p.capped?' Capped at what sells within the shelf life.':''}`:'Not ordered: '+p.flags.join(', ')+'.';
+      td.appendChild(h('div',{class:'row'},h('div',{style:'flex:1;min-width:240px'},h('p',{class:'small'},expl)),h('div',null,h('div',{class:'eyebrow'},'Projected stock, 14 days'),sparkline(proj,160,36))));
+      det.appendChild(td);tr.after(det);});
+    tbody.appendChild(tr);
+  }
+  root.appendChild(h('div',{class:'card'},h('div',{class:'card-h'},h('h3',null,`${st.name} · order proposal`),h('span',{class:'hint'},'click a line for the calculation and a stock projection')),h('div',{class:'scroll'},h('table',{class:'data'},thead,tbody))));
+  root.appendChild(h('div',{class:'note'},'Min level is the stock a bar should hold when a delivery lands (cycle demand plus safety stock). It changes every week with the forecast, which is what makes a fixed minimum per SKU go stale.'));
+}
+
+/* ---------------- Launches & menu ---------------- */
+function viewLaunches(root){
+  const cur=menuSeason(H);
+  root.appendChild(h('div',{class:'card'},h('div',{class:'card-h'},h('h3',null,'Menu calendar'),h('span',{class:'hint'},'four menu changes a year; seasonal SKUs are forecast inside their window only')),
+    h('div',{class:'row'},MENU_SEASONS.map(s=>{const from=`${s.from[1]} ${MONTHS[s.from[0]]}`,to=`${s.to[1]} ${MONTHS[s.to[0]]}`;return h('div',{class:'kpi',style:'flex:1;min-width:150px'+(s.key===cur?';border-color:var(--accent)':'')},h('div',{class:'l'},s.name),h('div',{class:'d'},`${from} to ${to}`),s.key===cur?pill('now','info'):null);}))));
+  const items=lifecycleItems();
+  const tl=h('div',{class:'timeline'});
+  for(const i of items){
+    let details=null;
+    if(i.kind==='phase-out'&&i.rows){details=h('details',null,h('summary',null,`Per bar: ${fmtNum(i.leftover)} ${i.sku.unit} expected left over (${fmtEur(i.leftV)} at cost)`),h('div',{class:'scroll',style:'margin-top:6px'},h('table',{class:'data compact'},h('thead',null,h('tr',null,h('th',null,'Bar'),h('th',{class:'num'},'On hand + arriving'),h('th',{class:'num'},'Demand to end'),h('th',{class:'num'},'Left over'),i.rows[0].stopDay!=null?h('th',null,'Last order'):null)),h('tbody',null,i.rows.filter(r=>r.onHand>0||r.dem>0).sort((a,b)=>b.left-a.left).map(r=>h('tr',{class:r.left>0.5?'warn':''},h('td',null,STORES[r.s].short),h('td',{class:'num'},fmtNum(r.onHand)),h('td',{class:'num'},fmtNum(r.dem)),h('td',{class:'num'},fmtNum(r.left)),r.stopDay!=null?h('td',null,fmtShort(r.stopDay)):null))))));}
+    if((i.kind==='launch'||i.kind==='rotation')&&i.rows){details=h('details',null,h('summary',null,`Initial allocation per bar: ${fmtNum(i.total)} ${i.sku.unit} in total`),h('div',{class:'scroll',style:'margin-top:6px'},h('table',{class:'data compact'},h('thead',null,h('tr',null,h('th',null,'Bar'),h('th',{class:'num'},'Forecast, first cycle'),h('th',{class:'num'},'Allocation (packs)'))),h('tbody',null,i.rows.sort((a,b)=>b.q-a.q).map(r=>h('tr',null,h('td',null,STORES[r.s].short),h('td',{class:'num'},fmtNum(r.q)),h('td',{class:'num'},r.pack)))))));}
+    if(i.kind==='new-bar'&&i.rows){details=h('details',null,h('summary',null,`Opening order: ${i.rows.length} SKUs, ${fmtEur(i.total)} at cost`),h('div',{class:'scroll',style:'margin-top:6px'},h('table',{class:'data compact'},h('thead',null,h('tr',null,h('th',null,'SKU'),h('th',{class:'num'},'Forecast, first cycle'),h('th',{class:'num'},'Opening order'),h('th',{class:'num'},'Value'))),h('tbody',null,i.rows.sort((a,b)=>b.value-a.value).map(r=>h('tr',null,h('td',null,SKUS[r.k].name),h('td',{class:'num'},fmtNum(r.q)),h('td',{class:'num'},r.pack+' '+SKUS[r.k].unit),h('td',{class:'num'},fmtEur(r.value))))))));}
+    tl.appendChild(h('div',{class:'tl'},h('div',{class:'when'},fmtShort(i.day),h('small',null,DOW_NAMES[dow(i.day)]+(i.day>=H?', in '+(i.day-H)+' days':', '+(H-i.day)+' days ago'))),h('div',null,h('div',{class:'row'},pill(i.kind,i.kind==='launch'||i.kind==='new-bar'?'good':i.kind==='phase-out'?'warn':i.kind==='promo'?'info':'neutral'),h('span',{class:'ttl'},i.title)),h('p',{class:'small muted',style:'margin-top:4px'},i.note),details)));
+  }
+  root.appendChild(sectionCard('Launches, phase-outs, promotions, openings','everything the forecast already knows about the next 10 weeks',tl));
+}
+
+/* ---------------- Bars ---------------- */
+function viewBars(root){
+  const sel=state.barSel!=null?state.barSel:3;
+  const rowsData=STORES.map(st=>{const k=st.opened<H?storeKpis(st.id):null;let units=0;const spark=[];for(let w=weekOf(WEEK0)-12;w<weekOf(WEEK0);w++){let u=0;for(let kk=0;kk<NK;kk++){const y=FC.ys[st.id][kk];for(let d=w*7;d<w*7+7;d++){if(y[d]===y[d])u+=y[d];}}spark.push(u);}for(let w=weekOf(WEEK0)-4;w<weekOf(WEEK0);w++)units+=spark[spark.length-(weekOf(WEEK0)-w)];
+    return {st,k,units:units/4,spark};});
+  const tbl=h('table',{class:'data'},h('thead',null,h('tr',null,h('th',null,'Bar'),h('th',null,'Cluster'),h('th',{class:'num'},'History'),h('th',{class:'num'},'Units / wk'),h('th',{class:'num'},'Accuracy'),h('th',{class:'num'},'Availability'),h('th',{class:'num'},'Waste'),h('th',null,'12 weeks'),h('th',null,''))),
+    h('tbody',null,rowsData.map(r=>h('tr',{class:'click'+(r.st.id===sel?' sel':''),onclick:()=>{state.barSel=r.st.id;render();}},h('td',null,h('b',null,r.st.short)),h('td',null,CLUSTERS[r.st.cluster].name),h('td',{class:'num'},r.st.opened>=H?'opens '+fmtShort(r.st.opened):r.st.opened<0?'78+ wk':Math.floor((H-r.st.opened)/7)+' wk'),h('td',{class:'num'},r.k?fmtNum(r.units):'–'),h('td',{class:'num'},r.k?fmtPct(1-r.k.wape,0):'–'),h('td',{class:'num'},r.k?fmtPct(r.k.availability,1):'–'),h('td',{class:'num'},r.k?fmtPct(r.k.wastePct):'–'),h('td',null,r.k?sparkline(r.spark,110,24):''),
+      h('td',null,r.k&&r.k.wape>0.14?pill('check forecast','warn'):r.st.opened>=H?pill('planned','info'):(H-r.st.opened)<56&&r.st.opened>=0?pill('new bar','info'):null)))));
+  const st=STORES[sel];const detail=h('div',{class:'stack'});
+  if(st.opened>=H){
+    const kcat={};for(const sku of SKUS){const q=fcSum(st.id,sku.idx,st.opened,st.opened+28);kcat[sku.cat]=(kcat[sku.cat]||0)+q;}
+    detail.appendChild(sectionCard(st.name,'planned bar: forecast from the cluster analog',
+      h('p',{class:'small'},`Opens ${fmtDate(st.opened)}. Until the bar has 8 weeks of its own sales, its forecast is the ${CLUSTERS[st.cluster].name.toLowerCase()} cluster average per SKU, scaled by a size index of ${st.index.toFixed(2)} (1.00 = an average bar), ramping from 65% to 100% over the first 4 weeks.`),
+      h('dl',{class:'kv',style:'margin-top:8px'},h('dt',null,'Cluster'),h('dd',null,CLUSTERS[st.cluster].name),h('dt',null,'Size index'),h('dd',null,st.index.toFixed(2)),h('dt',null,'Weekday shape'),h('dd',null,st.profile.map(v=>v.toFixed(2)).join(' · '))),
+      h('div',{class:'eyebrow',style:'margin-top:10px'},'First 4 weeks, forecast units by category'),h('div',{class:'mini-bars'},Object.entries(kcat).sort((a,b)=>b[1]-a[1]).map(([c,v],i,arr)=>h('div',null,h('span',{style:'text-align:left'},c),h('i',{style:`width:${(v/arr[0][1]*100).toFixed(0)}%;background:var(--accent)`}),h('span',null,fmtNum(v))))),
+      h('div',{style:'margin-top:10px'},h('button',{class:'btn sm',onclick:()=>nav('launches')},'See the opening order'))));
+  }else{
+    const k=storeKpis(st.id);
+    detail.appendChild(h('div',{class:'kpis',style:'grid-template-columns:repeat(3,minmax(0,1fr))'},kpiTile('Accuracy',fmtPct(1-k.wape,0),null,'1 week ahead, 4 wk'),kpiTile('Availability',fmtPct(k.availability,1),null,'excl. fresh bakery'),kpiTile('Waste',fmtPct(k.wastePct),null,fmtEur(k.wasteV)+' at cost, 4 wk')));
+    // weekday shape (actual, last 8 weeks, all SKUs by revenue proxy)
+    const ds=[0,0,0,0,0,0,0];for(let d=WEEK0-56;d<WEEK0;d++){let t=0;for(let kk=0;kk<NK;kk++){const y=FC.ys[st.id][kk][d];if(y===y)t+=y*SKUS[kk].rev;}ds[dow(d)]+=t;}const dmax=Math.max(...ds);
+    const catW=CATEGORIES.map(c=>storeCatWape(st.id,c));
+    const mix=CATEGORIES.map(c=>{let t=0;for(const sku of SKUS){if(sku.cat!==c)continue;t+=sumRange(FC.ys[st.id][sku.idx],WEEK0-28,WEEK0)*sku.rev;}return t;});const mixMax=Math.max(...mix);
+    const notesTa=h('textarea',{rows:3,placeholder:'Store feedback, e.g. "lead barista: new office opened next door, mornings up since October"'});notesTa.value=NOTES.data[st.id]||'';
+    detail.appendChild(h('div',{class:'grid g2d'},
+      sectionCard('Weekday shape','sales value, last 8 weeks',h('div',{class:'dowbar'},ds.map((v,i)=>h('div',{style:`height:${(v/dmax*100).toFixed(0)}%`},h('span',null,DOW_NAMES[i])))),h('p',{class:'small muted'},`${CLUSTERS[st.cluster].name} cluster. ${st.flags.satMarket?'Saturday market next door: +15% built into Saturdays.':''}`)),
+      sectionCard('Accuracy by category','1 week ahead, last 4 weeks',h('div',{class:'mini-bars'},CATEGORIES.map((c,i)=>h('div',{class:catW[i]===catW[i]&&catW[i]<0.15?'best':''},h('span',{style:'text-align:left'},c),h('i',{style:`width:${catW[i]===catW[i]?Math.min(100,catW[i]/0.6*100).toFixed(0):0}%`}),h('span',null,catW[i]===catW[i]?fmtPct(1-catW[i],0):'–')))))));
+    detail.appendChild(h('div',{class:'grid g2d'},
+      sectionCard('Sales mix','value by category, last 4 weeks',h('div',{class:'mini-bars'},CATEGORIES.map((c,i)=>h('div',null,h('span',{style:'text-align:left'},c),h('i',{style:`width:${(mix[i]/mixMax*100).toFixed(0)}%;background:var(--accent)`}),h('span',null,fmtEur(mix[i])))))),
+      sectionCard('Store feedback','what the numbers cannot see; saved in this browser',notesTa,h('div',{class:'row',style:'margin-top:8px'},h('button',{class:'btn sm primary',onclick:(e)=>{NOTES.data[st.id]=notesTa.value;saveNotes();e.target.textContent='Saved';setTimeout(()=>e.target.textContent='Save note',1200);}},'Save note'),h('button',{class:'btn sm',onclick:()=>nav('replenish',{store:st.id})},'Open order proposal'),h('button',{class:'btn sm',onclick:()=>nav('forecast',{store:st.id})},'Open forecasts')))));
+  }
+  root.appendChild(h('div',{class:'grid g2b'},sectionCard('Bars','click a bar for its profile',h('div',{class:'scroll'},tbl)),detail));
+}
+
+/* ---------------- Accuracy ---------------- */
+function viewAccuracy(root){
+  const tr=kpiTrend(12);const xt=tr.filter((x,i)=>i%2===0).map(x=>({x:x.week,label:weekLabel(x.week)}));
+  const c1=h('div'),c2=h('div');
+  const biasTxt=tr.slice(-4).map(x=>fmtSigned(x.bias)).join(' · ');
+  const card1=sectionCard('Forecast accuracy, weekly','1 week ahead, bar x SKU, whole network',c1,h('p',{class:'small muted',style:'margin-top:6px'},'Bias, last 4 weeks: '+biasTxt+' (forecast minus sold, over sold).'));
+  const card2=sectionCard('Waste and stock-outs, weekly','perishable waste share and out-of-stock days (excl. fresh bakery)',c2);
+  requestAnimationFrame(()=>{lineChart(c1,{height:220,xFmt:(x)=>'Week of '+weekLabel(x),xTicks:xt,yFmt:(v)=>Math.round(v*100)+'%',series:[{name:'Accuracy (1 minus WAPE)',color:'var(--s1)',pts:tr.map(x=>({x:x.week,y:1-x.wape})),endDot:true}]});
+    lineChart(c2,{height:220,xFmt:(x)=>'Week of '+weekLabel(x),xTicks:xt,yFmt:(v)=>(v*100).toFixed(1)+'%',series:[{name:'Waste share',color:'var(--s2)',pts:tr.map(x=>({x:x.week,y:x.wastePct})),endDot:true},{name:'Out-of-stock days',color:'var(--s5)',pts:tr.map(x=>({x:x.week,y:x.oosPct})),endDot:true}]});});
+  root.appendChild(h('div',{class:'grid g2e'},card1,card2));
+  // heatmap
+  const stores=openStores();const hm=h('div');
+  heatmap(hm,{rows:stores.map(s=>s.short),cols:CATEGORIES.map(c=>c.replace(' & alternatives','').replace(' & specials','')),values:stores.map(s=>CATEGORIES.map(c=>storeCatWape(s.id,c))),fmt:(v)=>Math.round(v*100)+'%',lo:0.05,hi:0.45,onClick:(i,j)=>nav('forecast',{store:stores[i].id,cat:CATEGORIES[j]})});
+  const sc=h('div');
+  const pts=stores.map(s=>{const k=storeKpis(s.id);return {x:k.wastePct,y:k.oosPct,label:s.short,color:'var(--s1)'};});const net=kpis();
+  requestAnimationFrame(()=>scatter(sc,{height:300,points:pts,xFmt:(v)=>(v*100).toFixed(0)+'%',yFmt:(v)=>(v*100).toFixed(0)+'%',xLabel:'waste share (perishables)',yLabel:'out-of-stock days',refX:net.wastePct,refY:net.oosPct,onClick:(p)=>{const s=stores.find(x=>x.short===p.label);if(s)nav('bars',{barSel:s.id});}}));
+  root.appendChild(h('div',{class:'grid g2'},sectionCard('Error by bar and category','WAPE, 1 week ahead, last 4 weeks; darker is worse; click a cell to open the forecasts',hm),sectionCard('Waste against stock-outs, per bar','last 4 weeks; the lines are the network averages',sc,h('p',{class:'small muted',style:'margin-top:6px'},'Bottom-left is where a bar wants to be. Top-left bars under-order (lead baristas playing safe on waste), bottom-right bars over-order.'))));
+  // methods
+  const counts={};let total=0;for(const s of stores)for(let k=0;k<NK;k++){const m=FC.series[s.id][k].method;counts[m]=(counts[m]||0)+1;total++;}
+  const mb=h('div',{class:'mini-bars'});const mxc=Math.max(...Object.values(counts));for(const [m,c] of Object.entries(counts).sort((a,b)=>b[1]-a[1]))mb.appendChild(h('div',{class:c===mxc?'best':''},h('span',{style:'text-align:left'},METHOD_NAMES[m]),h('i',{style:`width:${(c/mxc*100).toFixed(0)}%`}),h('span',null,Math.round(c/total*100)+'%')));
+  root.appendChild(h('div',{class:'grid g2e'},sectionCard('Which model wins where',`${total} bar x SKU series, chosen by backtest`,mb,h('p',{class:'small muted',style:'margin-top:8px'},'Simple methods win on stable items; the annual index wins on seasonal cold drinks and gifting beans; the last-year method wins on items with a strong calendar shape. The blend protects against a single model drifting.')),
+    sectionCard('How the numbers are defined','',h('dl',{class:'kv'},h('dt',null,'Accuracy'),h('dd',null,'1 minus WAPE: sum of absolute errors over sum of sales, weekly, per bar and SKU, forecast made one week ahead with the chosen model.'),h('dt',null,'Bias'),h('dd',null,'Sum of (forecast minus sold) over sum of sold. Positive means the forecast runs high.'),h('dt',null,'Availability'),h('dd',null,'Share of bar-SKU-days without lost sales, fresh bakery excluded because those items are meant to sell out some days.'),h('dt',null,'Waste'),h('dd',null,'Expired units over expired plus sold, perishables only.'),h('dt',null,'Fresh sell-out'),h('dd',null,'Share of bakery days that sold out. Around 30% is the cost-optimal rate at a 70% critical ratio.')))));
+}
+
+/* ---------------- shell ---------------- */
+function render(){
+  const main=document.getElementById('view');while(main.firstChild)main.removeChild(main.firstChild);
+  for(const b of document.querySelectorAll('.tabs button')){if(b.dataset.view===state.view)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');}
+  ({overview:viewOverview,forecast:viewForecast,replenish:viewReplenish,launches:viewLaunches,bars:viewBars,accuracy:viewAccuracy})[state.view](main);
+  window.scrollTo({top:0});
+}
+function nav(view,extra){Object.assign(state,extra||{});state.view=view;try{history.replaceState(null,'','#'+view);}catch(e){}render();}
+function boot(){
+  const tabs=document.querySelector('.tabs .wrap');for(const [v,l] of VIEWS){tabs.appendChild(h('button',{'data-view':v,onclick:()=>nav(v)},l));}
+  const hash=(location.hash||'').replace('#','');if(VIEWS.find(v=>v[0]===hash))state.view=hash;
+  document.getElementById('ctx-today').textContent=fmtDate(H)+' 2026';
+  document.getElementById('ctx-deliv').textContent=`${fmtDate(nextDelivery('daily',H+1))} fresh & chilled · ${fmtDate(nextDelivery('ambient',H+1))} ambient`;
+  const main=document.getElementById('view');main.appendChild(h('div',{class:'loading'},'Simulating 18 months of sales for 24 bars and fitting 1,000 forecasts…'));
+  setTimeout(()=>{runForecasts();render();},30);
+  let rt=null;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(render,200);});
+}
+document.addEventListener('DOMContentLoaded',boot);
+</script>
+</body>
+</html>

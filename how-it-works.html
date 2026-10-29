@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>How Cortado Works</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+/* Layout: a readable single column with the app's tokens; condensed caps for headings, blue accent, yellow only on the one call to action. */
+:root{--bg:#F2F4F8;--surface:#FFFFFF;--surface-2:#F7F8FB;--ink:#0B0F1A;--ink-2:#434B5A;--muted:#7D8696;--line:#E1E5EC;--accent:#0062FF;--accent-soft:#E5EEFF;--highlight:#FFF800;--highlight-ink:#0B0F1A;--good:#118A46;--warn:#C27A00;--crit:#D7263D;
+--font-display:"Barlow Condensed","Arial Narrow","Helvetica Neue",Arial,sans-serif;--font-body:"Barlow","Helvetica Neue",Arial,sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E121B;--surface:#161B26;--surface-2:#1C2230;--ink:#EEF1F6;--ink-2:#C0C7D3;--muted:#8792A3;--line:#273040;--accent:#4D8DFF;--accent-soft:#1A2B4D;--good:#2FBF71;--warn:#F2A71B;--crit:#FF5A6E;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0E121B;--surface:#161B26;--surface-2:#1C2230;--ink:#EEF1F6;--ink-2:#C0C7D3;--muted:#8792A3;--line:#273040;--accent:#4D8DFF;--accent-soft:#1A2B4D;--good:#2FBF71;--warn:#F2A71B;--crit:#FF5A6E;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15.5px;line-height:1.55;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.top{background:var(--surface);border-bottom:2px solid var(--accent);position:sticky;top:env(safe-area-inset-top,0px);z-index:9}
+.wrap{max-width:860px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:10px;flex-wrap:wrap}
+.logo{font-family:var(--font-display);font-weight:700;font-size:26px;letter-spacing:.06em;color:var(--accent);text-transform:uppercase;line-height:1;text-decoration:none}
+.logo i{display:inline-block;width:9px;height:9px;background:var(--highlight);margin-left:4px}
+.back{font-family:var(--font-display);text-transform:uppercase;letter-spacing:.06em;font-size:14px;font-weight:600;border:1.5px solid var(--accent);padding:5px 10px;text-decoration:none;color:var(--accent)}
+.back.primary{background:var(--highlight);color:var(--highlight-ink);border-color:var(--highlight-ink)}
+main.wrap{padding-block:28px 60px}
+h1,h2,h3{font-family:var(--font-display);font-weight:600;margin:0;text-wrap:balance;letter-spacing:.02em}
+h1{font-size:40px;text-transform:uppercase;line-height:1;letter-spacing:.03em}
+h2{font-size:24px;text-transform:uppercase;margin-top:40px;padding-top:14px;border-top:2px solid var(--accent)}
+h3{font-size:18px;margin-top:22px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-2)}
+p{margin:10px 0;max-width:66ch}
+.lead{font-size:18px;color:var(--ink-2);max-width:60ch}
+ul,ol{max-width:66ch;padding-left:22px} li{margin:4px 0}
+.eyebrow{font-family:var(--font-display);text-transform:uppercase;letter-spacing:.08em;font-size:13px;color:var(--muted);font-weight:600;margin-bottom:6px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:12px 0;background:var(--surface)}
+th{font-family:var(--font-display);text-transform:uppercase;letter-spacing:.05em;font-size:12.5px;color:var(--ink-2);text-align:left;padding:7px 9px;border-bottom:1.5px solid var(--line);font-weight:600;vertical-align:bottom}
+td{padding:7px 9px;border-bottom:1px solid var(--line);vertical-align:top}
+.scroll{overflow-x:auto}
+.flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:14px 0}
+.flow div{background:var(--surface);border:1px solid var(--line);padding:10px 10px;font-size:13.5px;min-width:0}
+.flow b{display:block;font-family:var(--font-display);text-transform:uppercase;letter-spacing:.05em;font-size:14px;color:var(--accent);margin-bottom:3px}
+.flow small{color:var(--muted);display:block;font-size:12px}
+.note{background:var(--surface);border-left:3px solid var(--accent);padding:10px 12px;margin:14px 0;max-width:70ch}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:12px 0}
+.card{background:var(--surface);border:1px solid var(--line);padding:12px 14px;min-width:0}
+.card b.t{display:block;font-family:var(--font-display);text-transform:uppercase;letter-spacing:.05em;font-size:15px;margin-bottom:4px}
+.formula{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13.5px;background:var(--surface-2);padding:8px 10px;border:1px solid var(--line);overflow-x:auto;max-width:100%}
+.muted{color:var(--muted)} .small{font-size:13px}
+.kpi-def td:first-child{font-weight:600;white-space:nowrap}
+.tag{display:inline-block;font-family:var(--font-display);text-transform:uppercase;letter-spacing:.06em;font-size:11.5px;background:var(--accent-soft);color:var(--accent);padding:1px 6px;font-weight:600;margin-left:6px;vertical-align:middle}
+.badge{font-family:var(--font-display);text-transform:uppercase;letter-spacing:.08em;font-size:11.5px;background:var(--highlight);color:var(--highlight-ink);padding:2px 6px;font-weight:700}
+footer{color:var(--muted);font-size:13px;margin-top:40px;border-top:1px solid var(--line);padding-top:12px}
+@media (max-width:760px){.flow{grid-template-columns:repeat(2,minmax(0,1fr))}.grid2{grid-template-columns:1fr}h1{font-size:32px}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap"><a class="logo" href="index.html" data-app>Cortado<i></i></a><a class="back primary" href="index.html" data-app>Open the planner</a></div></header>
+<main class="wrap">
+<div class="eyebrow">How it works <span class="badge">prototype · synthetic data</span></div>
+<h1>Right product, right bar, right day.</h1>
+<p class="lead">Cortado is a working prototype of the planning tool a Retail Demand Planner would run at Wakuli: a store-and-SKU forecast for every bar, an order proposal for every delivery, and the KPIs to steer waste against availability. It is built around the way the bar network actually runs: a central hub, fixed delivery days, four menu changes a year, monthly coffee rotations and bars that open before they have any history.</p>
+<div class="note"><b>What is real and what is not.</b> The bar names come from Wakuli's public store locator. Everything else (volumes, SKUs, prices, stock, waste, events) is simulated in the browser when the page loads, so the tool can be shown without touching any Wakuli data. Swap the simulated feed for Lightspeed and Odoo extracts and the same logic runs on the real network.</div>
+
+<h2>1. The weekly rhythm</h2>
+<p>The tool is organised around the decisions a planner takes every week, not around the models behind them.</p>
+<div class="flow">
+<div><b>Every night</b>Sales, stock and deliveries land from Lightspeed and Odoo. Forecasts refresh for every bar and SKU.<small>automatic</small></div>
+<div><b>Order day</b>Each bar gets a proposal per delivery: fresh and chilled for the next day, ambient for Monday and Thursday. Lead baristas confirm or adjust.<small>Overview, Replenish</small></div>
+<div><b>Exceptions</b>The planner works the short list: stock-outs before the next delivery, expiring stock, waste risk, sales far off forecast.<small>Overview</small></div>
+<div><b>Store feedback</b>What the numbers cannot see goes in as an override with a note: road works, a new office next door, a marketing push.<small>Forecast, Bars</small></div>
+<div><b>Friday review</b>Accuracy, bias, waste and availability per bar and category. Launches and menu changes for the coming weeks.<small>Accuracy, Launches</small></div>
+</div>
+
+<h2>2. Data in, decisions out</h2>
+<div class="grid2">
+<div class="card"><b class="t">Data in</b>
+<ul class="small">
+<li><b>Lightspeed POS</b>: units sold per bar, SKU and day. Drink sales are exploded into ingredients through the recipes (bill of materials) in Odoo, so milk, syrups and bar beans are forecast in their own units.</li>
+<li><b>Odoo</b>: stock per bar, deliveries in transit, delivery calendar, pack sizes, shelf life, cost and price.</li>
+<li><b>Stock counts</b> by lead baristas (and later the camera count), which set the position the proposal starts from.</li>
+<li><b>Calendar</b>: menu seasons, launches and phase-outs, promotions from Marketing, local events per bar, bar openings.</li>
+<li><b>Weather</b>: a 10-day forecast and the climatological normal, for cold drinks and iced items.</li>
+</ul></div>
+<div class="card"><b class="t">Decisions out</b>
+<ul class="small">
+<li><b>Order proposals</b> per bar and delivery, with the calculation visible on every line, exportable as CSV or pushed to Odoo as purchase orders and transfers.</li>
+<li><b>Minimum levels per bar and SKU</b> that follow the forecast instead of going stale.</li>
+<li><b>Allocations</b> for launches, rotations and new bars, and run-down plans for phase-outs.</li>
+<li><b>Network forecast by SKU</b> for the Master Production Schedule in Odoo, so roasting and packing see the same numbers as the bars.</li>
+<li><b>KPIs</b> for the S&amp;OP meeting: accuracy, bias, availability, waste, lost sales, fresh sell-out rate.</li>
+</ul></div>
+</div>
+
+<h2>3. The forecast</h2>
+<p>Every bar x SKU series goes through the same five steps. Nothing is a black box: the Forecast page shows which model is in use, how it scored, and which drivers it found.</p>
+<ol>
+<li><b>Clean the history.</b> A bar that sold out at 11:00 recorded less than it could have sold. Days with a stock-out are lifted to the recent same-weekday level, so the model does not learn that demand is low because the shelf was empty.</li>
+<li><b>Strip the known factors.</b> Promotions, local events, holidays, menu windows, launch ramps and the monthly rotation of Discover Monthly are known in advance. They are divided out of the history before fitting and multiplied back into the horizon, which is how Marketing's calendar becomes part of the number.</li>
+<li><b>Fit candidate models</b> on the daily baseline: a 4-week moving average with a weekday shape, Holt-Winters exponential smoothing with a weekly season and damped trend (parameters chosen by grid search), the same model scaled by a category annual index built from last year, last year's same week scaled by this year's growth, and Croston's method for slow, lumpy items such as merch.</li>
+<li><b>Backtest and pick.</b> Each model forecasts two 4-week folds it has not seen (origins 8 and 4 weeks ago) and is scored on weekly WAPE. The best one wins; if a blend of the top two scores better, the blend wins. On this network, simple methods win on stable items, the annual index on seasonal cold drinks and gifting beans, last-year on items with a strong calendar shape.</li>
+<li><b>Add what the data could not know.</b> A regression of residuals on the temperature anomaly gives each SKU a weather sensitivity (cold brew: about +4% per degree above normal), applied to the 10-day weather forecast. Planner overrides, with a reason, sit on top. An 80% range comes from the model's residuals so the proposal can size safety stock.</li>
+</ol>
+<h3>New bars and new products</h3>
+<p>A bar with no history is forecast from its cluster (city centre, neighbourhood, office and commuter, student) scaled by a size index, ramping from 65% to 100% over four weeks. As its own sales come in, the weight shifts from the analog to its data over eight weeks. A new product borrows a sister SKU (Speculaas syrup starts at 85% of Pumpkin spice) with a three-week ramp, until it has a history of its own.</p>
+
+<h2>4. The order proposal</h2>
+<p>Bars are replenished on a fixed calendar, so the proposal is a periodic-review calculation: a delivery has to cover demand until the next delivery, with a buffer sized to how much the forecast can be wrong.</p>
+<div class="formula">position at delivery = stock still within shelf life at the delivery date + arriving, minus demand until then (expiring units are eaten first)<br>minimum level = forecast demand from this delivery to the next + safety stock<br>safety stock = z x forecast error x sqrt(days of exposure)<br>order = minimum level minus position, rounded to packs</div>
+<div class="scroll"><table>
+<tr><th>Category</th><th>Delivery</th><th>Buffer rule</th><th>Why</th></tr>
+<tr><td>Fresh bakery (1 to 3 days)</td><td>Daily</td><td>Newsvendor: service level equals margin / (margin + cost of a wasted unit), about 70%</td><td>Balances waste against a missed sale explicitly. Selling out about 30% of days is the cost-optimal outcome, not a failure.</td></tr>
+<tr><td>Dairy, cold drinks, juice</td><td>Mon, Wed, Fri</td><td>93 to 96% service level, pack chosen by expected cost</td><td>Short shelf life: a pack too many is waste, a pack too few is a stock-out on the busiest day.</td></tr>
+<tr><td>Bar coffee, syrups, retail beans</td><td>Mon, Thu</td><td>95 to 98% service level, rounded up</td><td>The ingredients every drink needs; a stock-out closes part of the menu.</td></tr>
+<tr><td>Packaging</td><td>Mon, Thu</td><td>99% service level</td><td>Cheap to hold, expensive to run out of.</td></tr>
+<tr><td>Merch, giftcards</td><td>Mon, Thu</td><td>90%, Croston forecast</td><td>Slow, lumpy, no shelf life.</td></tr>
+</table></div>
+<p>Two guards sit on top. A <b>shelf-life cap</b> never delivers more than sells before expiry. A <b>stock projection</b> runs day by day until the delivery lands and flags lines that run out before it, with the shortfall, so the planner can ask the hub for a top-up or move stock between bars.</p>
+
+<h2>5. Menu changes, launches, phase-outs</h2>
+<p>Four menu changes a year, a monthly coffee rotation and several launches mean the lifecycle is part of the forecast, not an afterthought.</p>
+<ul>
+<li><b>Seasonal items</b> are forecast inside their menu window only, with a first-week ramp and a last-week dip built in. Their proposals run the stock down towards the menu change and show the last order date per bar.</li>
+<li><b>Phase-outs</b> list, per bar, what will be left over on the last selling day and what it is worth, early enough to transfer or promote it.</li>
+<li><b>Launches</b> get an initial allocation per bar from the sister SKU, covering the first delivery cycle, then the ramp.</li>
+<li><b>Discover Monthly</b> carries its own rotation pattern: +35% in the first week of a new origin, -25% in the last, so the previous origin is not over-ordered into the switch.</li>
+<li><b>New bars</b> get an opening order per SKU from the cluster analog.</li>
+</ul>
+
+<h2>6. The KPIs and what they mean</h2>
+<div class="scroll"><table class="kpi-def">
+<tr><th>KPI</th><th>Definition</th><th>Target on this network</th></tr>
+<tr><td>Forecast accuracy</td><td>1 minus WAPE: sum of absolute errors over sum of sales, weekly, per bar and SKU, forecast made one week ahead. Weighted, so cups and beans count more than giftcards.</td><td>88%+ at bar x SKU level</td></tr>
+<tr><td>Bias</td><td>Sum of (forecast minus sold) over sum of sold. Positive means the forecast runs high and stock builds up.</td><td>within ±2%</td></tr>
+<tr><td>Availability</td><td>Share of bar-SKU-days without lost sales, fresh bakery excluded.</td><td>97%+</td></tr>
+<tr><td>Lost sales</td><td>Units short on stock-out days, valued at retail price or, for ingredients, at the drink revenue they carry.</td><td>trend down</td></tr>
+<tr><td>Waste</td><td>Expired units over expired plus sold, perishables only, valued at cost.</td><td>under 5% network, 15% fresh bakery</td></tr>
+<tr><td>Fresh sell-out rate</td><td>Share of bakery days that sold out. The cost-optimal rate at a 70% critical ratio is about 30%; far below it means waste, far above it means empty baskets at 10:00.</td><td>25 to 35%</td></tr>
+</table></div>
+
+<h2>7. What changes with real data</h2>
+<p>The prototype assumes clean stock positions. On the real network the first job is data quality: stock counts that are late or wrong make every proposal wrong in the same direction. The tool is built to make that visible (a bar whose availability and waste are both high is usually a counting problem, not a forecasting one) and to degrade gracefully: when a count is missing, the proposal falls back to the projected position and says so.</p>
+<p>With a year of real history the model set would grow: a gradient-boosted model across all bars with calendar, weather, price and promotion features typically beats per-series smoothing on a network this size, and the backtest decides whether it earns its place. The structure stays the same: clean, strip, fit, test, re-apply, explain.</p>
+
+<h2>8. A 90-day plan for the role</h2>
+<div class="scroll"><table>
+<tr><th>Weeks</th><th>Focus</th><th>Done means</th></tr>
+<tr><td>1 to 4</td><td>Listen and measure. Visit bars, sit with lead baristas on order day, map the Lightspeed to Odoo flow, audit stock counts. Put a forecast accuracy and waste baseline in place per bar and category.</td><td>One shared KPI sheet the S&amp;OP team trusts; the top five root causes of stock-outs and waste, with numbers.</td></tr>
+<tr><td>5 to 8</td><td>Replace the manual weekly forecast with a backtested statistical one for the bars; publish minimum levels per bar and SKU in Odoo; run the exceptions list every order day.</td><td>Proposals in use at the first bars; waste and availability moving on the dashboard; the winter menu planned with allocations and run-downs.</td></tr>
+<tr><td>9 to 13</td><td>Automate the data feed and the nightly refresh, connect the network forecast to the MPS, add the weather feed and the promotion calendar, document the process so it survives a holiday.</td><td>Planning scales to 27 bars without more hands; a written process; a roadmap for ML and the camera stock count.</td></tr>
+</table></div>
+
+<footer>Built by Paolo Caneparo as a working prototype for the Retail Demand Planner role at Wakuli. Independent work: no Wakuli data, no third-party code or intellectual property. Forecasts, proposals and KPIs are computed in the browser. <a href="index.html" data-app>Open the planner</a>.</footer>
+</main>
+<script>(function(){var APP_URL="https://claude.ai/artifact/PE8WNn7qdnx7bhC2W8UcWr";if(APP_URL&&/claude\.ai$/.test(location.hostname)){document.querySelectorAll("a[data-app]").forEach(function(a){a.href=APP_URL;});}})();</script>
+</body>
+</html>
